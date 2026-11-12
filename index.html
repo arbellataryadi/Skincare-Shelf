@@ -1,0 +1,1575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skincare Shelf</title>
+<meta name="description" content="Track your skincare: what's new, in use, expiring or finished. Data stays on your phone.">
+<meta name="theme-color" content="#fbe3dc">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Skincare">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap">
+<style>
+/* Layout: blush header band with greeting, then a white panel with rounded top corners holding the content; pastel product tiles; floating pill tab bar */
+:root {
+  --bg: #ffffff;           /* clean white page */
+  --panel: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f5f5f7;    /* light grey cards */
+  --fg: #26252a;
+  --muted: #9e9ca5;
+  --line: #ececf0;
+  --ink: #1d1c21;          /* dark primary buttons */
+  --ink-fg: #ffffff;
+  --accent: #f7988a;       /* coral highlight */
+  --accent-fg: #ffffff;
+  --accent-soft: #fde3de;
+  --t-blue: #e4effd; --t-mint: #dcf5f1; --t-peach: #fdebdf; --t-lilac: #ece9fb; --t-pink: #fde3e8; --t-sun: #fdf3dc; --t-sand: #f6f1ef;
+  --ok: #3f9a6b; --ok-bg: #e0f3e8;
+  --warn: #c07a12; --warn-bg: #fdf0d7;
+  --bad: #d2493c; --bad-bg: #fde3df;
+  --new: #4e78c9; --new-bg: #e4effd;
+  --done: #8d8a92; --done-bg: #f1eff1;
+  --shadow: 0 10px 28px rgba(150, 90, 80, .08);
+  --shadow-lg: 0 18px 44px rgba(90, 50, 45, .16);
+  --scrim: rgba(30, 25, 28, .38);
+  --font-body: "Gaegu", "Chalkboard SE", "Comic Sans MS", cursive;
+  --font-accent: "Gaegu", "Chalkboard SE", "Comic Sans MS", cursive;
+  --r-lg: 28px; --r-md: 22px; --r-sm: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17151a; --panel: #17151a; --surface: #211e24; --surface-2: #26232a; --fg: #f3eef0; --muted: #a7a2ab; --line: #2f2b33;
+    --ink: #f6eef0; --ink-fg: #1b181d; --accent: #f7a194; --accent-fg: #2a120d; --accent-soft: #3d2622;
+    --t-blue: #1f2a3a; --t-mint: #1b2f2b; --t-peach: #382a22; --t-lilac: #29263d; --t-pink: #3a2329; --t-sun: #372f1f; --t-sand: #29252a;
+    --ok: #7fd3a1; --ok-bg: #1b3326; --warn: #f1c26b; --warn-bg: #3a2d12; --bad: #f29b94; --bad-bg: #3d1c1a;
+    --new: #9dbdf2; --new-bg: #1f2a3a; --done: #b3aeb6; --done-bg: #29252a;
+    --shadow: 0 10px 28px rgba(0,0,0,.35); --shadow-lg: 0 18px 44px rgba(0,0,0,.55); --scrim: rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17151a; --panel: #17151a; --surface: #211e24; --surface-2: #26232a; --fg: #f3eef0; --muted: #a7a2ab; --line: #2f2b33;
+  --ink: #f6eef0; --ink-fg: #1b181d; --accent: #f7a194; --accent-fg: #2a120d; --accent-soft: #3d2622;
+  --t-blue: #1f2a3a; --t-mint: #1b2f2b; --t-peach: #382a22; --t-lilac: #29263d; --t-pink: #3a2329; --t-sun: #372f1f; --t-sand: #29252a;
+  --ok: #7fd3a1; --ok-bg: #1b3326; --warn: #f1c26b; --warn-bg: #3a2d12; --bad: #f29b94; --bad-bg: #3d1c1a;
+  --new: #9dbdf2; --new-bg: #1f2a3a; --done: #b3aeb6; --done-bg: #29252a;
+  --shadow: 0 10px 28px rgba(0,0,0,.35); --shadow-lg: 0 18px 44px rgba(0,0,0,.55); --scrim: rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  --accent: #ef8574; /* each menu gets its own pastel: set per view below */
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, var(--panel));
+  --accent-mid: color-mix(in srgb, var(--accent) 34%, var(--panel)); }
+body[data-view="shelf"]   { --accent: #ef8574; }  /* peach-coral */
+body[data-view="routine"] { --accent: #6d97e3; }  /* powder blue */
+body[data-view="skin"]    { --accent: #9a86e3; }  /* lilac */
+body[data-view="photos"]  { --accent: #45b29b; }  /* mint */
+.wrap { max-width: 520px; margin: 0 auto; padding-top: 26px; }
+.wrap > header, .headx { padding-left: max(22px, env(safe-area-inset-left, 0px)); padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.headx:empty { display: none; }
+.headx { margin-top: 18px; }
+.panel { background: var(--panel); margin-top: 14px; min-height: 100vh;
+  padding-top: 24px; padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.panel .card { background: var(--surface-2); box-shadow: none; }
+.panel .empty { background: var(--surface-2); }
+.panel .card .chip { background: var(--panel); }
+.panel .card .chip[aria-pressed="true"] { background: var(--accent); }
+.panel .tab { background: var(--surface-2); }
+.panel .tab[aria-selected="true"] { background: var(--accent); }
+.panel .seg { background: var(--surface-2); }
+.panel .rsum { box-shadow: none; border: 1px solid var(--line); }
+h1 { font-weight: 400; font-size: 40px; letter-spacing: -.01em; margin: 0; line-height: 1.2; text-wrap: balance; }
+h1 b { font-weight: 600; }
+h2 { font-weight: 600; font-size: 28px; margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+h3 { font-weight: 600; font-size: 22px; margin: 0; }
+.sub { color: var(--muted); margin: 4px 0 0; font-size: 15px; }
+.note { color: var(--muted); font-size: 14px; margin: 0; }
+h1, h2, h3, .day b, .banner .txt small, .hero .eyebrow { font-family: var(--font-accent); letter-spacing: 0; }
+h1 { line-height: 1.05; } h2 { line-height: 1.1; }
+h1, h1 b, h2, h3, .banner .txt b, .hero h2, .day b { font-weight: 700; }
+body { font-size: 17px; }
+.btn, .tab, .fab, .scanpill .t, .pcard .nm, .step .what b, .rsum .mid b, .pill, .fact b, .rec b, .review b, .seg button { font-weight: 700; }
+.banner .txt small, .hero .eyebrow { font-size: 19px; text-transform: none; font-weight: 600; }
+
+/* header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.top > div { min-width: 0; }
+.avatar { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; flex: 0 0 auto; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-weight: 600; font-size: 20px; border: 3px solid var(--surface); box-shadow: var(--shadow); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar svg { width: 24px; height: 24px; }
+button.avatar { padding: 0; cursor: pointer; font-family: var(--font-body); }
+section.view { display: flex; flex-direction: column; gap: 18px; }
+/* home banner */
+.banner { position: relative; border: 0; width: 100%; cursor: pointer; text-align: left; font: inherit; color: #3a2a26; border-radius: var(--r-lg); overflow: hidden; min-height: 150px;
+  background: radial-gradient(circle at 18% 30%, #fff6f1 0 18%, transparent 46%), linear-gradient(120deg, #f8d9cc, #f1b9a8); display: grid; grid-template-columns: 42% 1fr; align-items: center; padding: 0; }
+.banner .art { height: 100%; min-height: 150px; display: grid; place-items: center; position: relative; }
+.banner .art img { width: 78%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 18px; box-shadow: 0 12px 24px rgba(120,60,45,.25); transform: rotate(-6deg); }
+.banner .art svg { width: 70px; height: 110px; transform: rotate(-12deg); filter: drop-shadow(0 10px 14px rgba(120,60,45,.25)); }
+.banner .txt { padding: 18px 18px 18px 4px; }
+.bannerwrap { position: relative; }
+.bannerEdit { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(255,255,255,.75); color: #3a2a26; display: grid; place-items: center; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.bannerEdit svg { width: 18px; height: 18px; }
+.banner .art.cut img { position: absolute; bottom: 8%; width: auto; height: 82%; max-width: 70%; aspect-ratio: auto; object-fit: contain; border-radius: 0; box-shadow: none; filter: drop-shadow(0 12px 12px rgba(110, 55, 40, .28)); transform: none; }
+.banner .art.cut img.c1-0 { left: 50%; transform: translateX(-50%) rotate(-6deg); height: 88%; }
+.banner .art.cut img.c2-0 { left: 14%; transform: rotate(-10deg); height: 74%; }
+.banner .art.cut img.c2-1 { left: 44%; transform: rotate(6deg); height: 86%; z-index: 1; }
+.banner .art.cut img.c3-0 { left: 4%; transform: rotate(-12deg); height: 66%; }
+.banner .art.cut img.c3-1 { left: 30%; height: 88%; z-index: 2; transform: rotate(-2deg); }
+.banner .art.cut img.c3-2 { left: 56%; transform: rotate(10deg); height: 70%; z-index: 1; }
+.cutlist { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.cutlist .empty { grid-column: 1 / -1; }
+.cutitem { position: relative; aspect-ratio: 1 / 1; max-width: 100%; border-radius: var(--r-md); background: repeating-conic-gradient(var(--surface-2) 0 25%, var(--panel) 0 50%) 0 0 / 16px 16px; display: grid; place-items: center; overflow: hidden; }
+.cutitem img { max-width: 85%; max-height: 85%; object-fit: contain; }
+.cutitem .iconbtn { position: absolute; top: 6px; right: 6px; color: var(--bad); }
+.banner .txt small { display: block; font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+.banner .txt b { display: block; font-family: var(--font-accent); font-weight: 500; font-size: 34px; line-height: 1.1; }
+.scanpill { display: flex; align-items: center; gap: 12px; background: var(--t-lilac); border-radius: var(--r-md); padding: 10px 16px 10px 10px; border: 0; font: 500 16px var(--font-body); color: var(--fg); cursor: pointer; width: 100%; text-align: left; }
+.scanpill .ic { width: 42px; height: 42px; border-radius: 14px; background: var(--panel); display: grid; place-items: center; flex: 0 0 auto; }
+.scanpill .ic svg { width: 20px; height: 20px; }
+.scanpill .t { flex: 1; }
+.sechead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 4px; }
+.link { background: none; border: 0; color: var(--muted); font: 500 15px var(--font-body); cursor: pointer; padding: 4px 0; }
+
+/* generic */
+.card { background: var(--surface); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow); }
+.alert { padding: 12px 16px; border-radius: var(--r-md); background: var(--warn-bg); color: var(--warn); font-weight: 500; font-size: 15px; }
+.alert.bad { background: var(--bad-bg); color: var(--bad); }
+.alert.info { background: var(--t-mint); color: var(--fg); }
+.btn { border: 0; background: var(--surface-2); color: var(--fg); border-radius: 999px; padding: 10px 16px; font: 500 16px var(--font-body); cursor: pointer; }
+.btn.primary { background: var(--ink); color: var(--ink-fg); }
+.btn.coral { background: var(--accent); color: var(--accent-fg); }
+.btn.big { padding: 15px 18px; font-size: 17px; width: 100%; }
+.btn.danger { color: var(--bad); background: var(--bad-bg); }
+.btn:disabled { opacity: .5; cursor: default; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.empty { text-align: center; color: var(--muted); padding: 30px 18px; background: var(--surface); border-radius: var(--r-lg); }
+:is(.btn, .chip, .fab, .nav button, .pcard, .check, .thumb, .day, .seg button, .link, .avatar, .pthumb):focus-visible, :is(input, select, textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pill { font-size: 13px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.s-new { background: var(--new-bg); color: var(--new); } .s-use { background: var(--ok-bg); color: var(--ok); }
+.s-soon { background: var(--warn-bg); color: var(--warn); } .s-bad { background: var(--bad-bg); color: var(--bad); } .s-done { background: var(--done-bg); color: var(--done); }
+
+/* tints */
+.t-Cleanser { background: var(--t-blue); } .t-Toner { background: var(--t-mint); } .t-Exfoliant { background: var(--t-sun); }
+.t-Serum { background: var(--t-peach); } .t-Eye-cream { background: var(--t-lilac); } .t-Moisturizer { background: var(--t-pink); }
+.t-Sunscreen { background: var(--t-sun); } .t-Mask { background: var(--t-lilac); } .t-Other { background: var(--t-sand); }
+.t-Mist { background: var(--t-blue); } .t-Booster { background: var(--t-peach); } .t-Spot-gel { background: var(--t-mint); }
+.t-Lip-care { background: var(--t-pink); } .t-Body-care { background: var(--t-sun); } .t-Armpit-care { background: var(--t-lilac); }
+.t-Hair-care { background: var(--t-mint); } .t-Vitamins { background: var(--t-peach); }
+
+/* routine summary on home */
+.rsum { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; background: var(--surface); border-radius: var(--r-md); padding: 14px 16px; box-shadow: var(--shadow); border: 0; color: var(--fg); font: inherit; text-align: left; cursor: pointer; width: 100%; }
+.rsum .ic { width: 42px; height: 42px; border-radius: 14px; background: var(--t-blue); display: grid; place-items: center; color: var(--fg); }
+.rsum .ic svg { width: 22px; height: 22px; }
+.rsum .mid { min-width: 0; }
+.rsum .mid b { display: block; font-weight: 600; }
+.rsum .bar { display: block; height: 5px; border-radius: 5px; background: var(--line); overflow: hidden; margin-top: 6px; }
+.rsum .bar i { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
+.rsum .pct { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* filter chips */
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.tab { flex: 0 0 auto; border: 0; background: var(--surface); color: var(--fg); border-radius: 999px; padding: 10px 18px; font: 500 16px var(--font-body); cursor: pointer; display: flex; gap: 6px; align-items: center; }
+.tab .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-fg); }
+.tab[aria-selected="true"] .n { color: inherit; opacity: .8; }
+
+/* product tiles */
+.pgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pcard { border: 0; padding: 0; background: none; color: var(--fg); font: inherit; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pcard .img { position: relative; aspect-ratio: 4 / 5; max-width: 100%; border-radius: var(--r-md); overflow: hidden; display: grid; place-items: center; }
+.pcard .img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pcard .img .letter { font-family: var(--font-accent); font-size: 64px; color: var(--fg); opacity: .35; }
+.pcard .img .pill { position: absolute; top: 10px; left: 10px; }
+.pcard .img .life { position: absolute; left: 10px; right: 10px; bottom: 10px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.6); overflow: hidden; }
+.pcard .img .life i { display: block; height: 100%; background: var(--ok); }
+.pcard .img .life.soon i { background: var(--warn); }
+.pcard .nm { font-weight: 500; font-size: 16px; line-height: 1.3; padding: 0 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.pcard .mt { font-size: 14px; color: var(--muted); padding: 0 4px; margin-top: -4px; }
+
+/* product detail */
+.dimg { aspect-ratio: 1 / 1; max-height: 60vh; margin: 0 auto; width: 100%; max-width: 100%; border-radius: var(--r-lg); overflow: hidden; display: grid; place-items: center; }
+.dimg img { width: 100%; height: 100%; object-fit: cover; }
+.dimg .letter { font-family: var(--font-accent); font-size: 90px; opacity: .35; }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fact { background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px; min-width: 0; }
+.fact span { display: block; font-size: 13px; color: var(--muted); }
+.fact b { font-weight: 500; font-size: 16px; overflow-wrap: anywhere; }
+
+/* small thumb */
+.pthumb { width: 78px; height: 78px; border-radius: 18px; overflow: hidden; background: var(--surface); display: grid; place-items: center; flex: 0 0 auto; font-family: var(--font-accent); font-size: 30px; color: var(--muted); padding: 0; border: 0; }
+.pthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* nav */
+.nav { position: fixed; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 6; display: flex; justify-content: center; pointer-events: none;
+  padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+.nav .in { pointer-events: auto; background: var(--surface); border-radius: 999px; box-shadow: var(--shadow-lg); padding: 8px; display: flex; gap: 6px; width: 100%; max-width: 340px; justify-content: space-between; }
+.nav button { background: none; border: 0; color: var(--muted); width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; }
+.nav button svg { width: 24px; height: 24px; }
+.nav button[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+.nav .in { border: 1px solid var(--line); }
+.fab { position: fixed; right: calc(18px + env(safe-area-inset-right, 0px)); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 999px; padding: 14px 20px; font: 600 17px var(--font-body); box-shadow: var(--shadow-lg); cursor: pointer; z-index: 5; display: flex; gap: 6px; align-items: center; }
+
+/* sheets */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--surface); border-radius: 30px 30px 0 0; box-shadow: var(--shadow-lg); max-height: 92%; overflow-y: auto;
+  padding-top: 10px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+.sheet::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 14px; }
+.sheet form, .sheet .inner { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+label, .lbl { font-size: 14px; font-weight: 500; color: var(--muted); display: block; margin-bottom: 6px; }
+input[type="text"], input[type="date"], select, textarea { width: 100%; font: 16px var(--font-body); padding: 12px 14px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); }
+textarea { min-height: 72px; resize: vertical; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 0; background: var(--surface-2); color: var(--fg); border-radius: 999px; padding: 8px 14px; font: 400 15px var(--font-body); cursor: pointer; }
+.card .chip { background: var(--bg); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.chip.sm { padding: 6px 0; width: 34px; text-align: center; font-size: 14px; font-weight: 500; }
+.hint { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row2 > div { min-width: 0; }
+.formbtns { display: flex; gap: 10px; }
+.formbtns .btn { flex: 1; padding: 14px; font-size: 17px; }
+.photofield { display: flex; gap: 14px; align-items: center; }
+.photofield .pthumb { width: 110px; height: 110px; border-radius: 20px; background: var(--surface-2); font-size: 36px; }
+.photofield .btns { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(160px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--ink-fg); padding: 11px 18px; border-radius: 999px; font-weight: 500; z-index: 30; max-width: calc(100% - 36px); text-align: center; box-shadow: var(--shadow-lg); }
+
+/* routine */
+.days { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.day { flex: 0 0 58px; border: 0; background: var(--surface-2); color: var(--fg); border-radius: 18px; padding: 10px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; font: inherit; }
+.day b { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.day span { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.day i { width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; background: transparent; }
+.day i.part { background: var(--warn); } .day i.full { background: var(--ok); }
+.day.future { opacity: .55; }
+.day[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); box-shadow: var(--shadow); }
+.day[aria-pressed="true"] span { color: inherit; opacity: .85; }
+.day[aria-pressed="true"] i.full, .day[aria-pressed="true"] i.part { background: var(--accent-fg); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-radius: 999px; padding: 5px; gap: 4px; }
+.seg button { border: 0; background: transparent; color: var(--muted); border-radius: 999px; padding: 10px; font: 500 16px var(--font-body); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.seg button svg { width: 18px; height: 18px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--ink-fg); }
+.rhead { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+.ring { --p: 0; width: 58px; height: 58px; border-radius: 50%; flex: 0 0 auto; background: conic-gradient(var(--accent) calc(var(--p) * 1%), var(--line) 0); display: grid; place-items: center; }
+.ring span { width: 46px; height: 46px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+.steps { display: flex; flex-direction: column; gap: 10px; }
+.step { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; border-radius: var(--r-md); padding: 10px 14px 10px 10px; }
+.step .what { min-width: 0; }
+.step .what small { display: block; font-size: 13px; color: var(--muted); }
+.step .what b { display: block; font-weight: 500; font-size: 16px; line-height: 1.3; overflow-wrap: anywhere; }
+.step .what .warn { font-size: 14px; color: var(--bad); font-weight: 500; }
+.step.done .what b { text-decoration: line-through; opacity: .6; }
+.check { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(0,0,0,.12); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--ink-fg); }
+.check[aria-checked="true"] { background: var(--ink); border-color: var(--ink); }
+.check svg { width: 16px; height: 16px; }
+.check:disabled { cursor: default; opacity: .5; }
+.editstep { background: var(--surface-2); border-radius: var(--r-md); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.editstep .row { display: flex; gap: 10px; align-items: center; }
+.editstep .row b { flex: 1; min-width: 0; font-weight: 500; overflow-wrap: anywhere; }
+.iconbtn { border: 0; background: var(--surface); color: var(--fg); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font: 600 16px var(--font-body); flex: 0 0 auto; }
+.iconbtn:disabled { opacity: .3; }
+
+/* skin */
+.hero { position: relative; border-radius: var(--r-lg); overflow: hidden; padding: 22px 20px; background: linear-gradient(135deg, var(--accent-soft), var(--accent-mid)); display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
+.hero h2 { font-family: var(--font-accent); font-weight: 500; font-size: 32px; line-height: 1.15; }
+.hero .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--fg); opacity: .7; margin-bottom: 6px; }
+.hero .face { width: 88px; height: 110px; border-radius: 44px; overflow: hidden; background: rgba(255,255,255,.5); display: grid; place-items: center; position: relative; }
+.hero .face img { width: 100%; height: 100%; object-fit: cover; }
+.hero .face svg { width: 40px; height: 40px; color: var(--fg); opacity: .5; }
+.scanbtn { display: flex; align-items: center; gap: 12px; background: var(--t-blue); border-radius: var(--r-md); padding: 14px 16px; border: 0; font: 500 16px var(--font-body); color: var(--fg); cursor: pointer; width: 100%; text-align: left; }
+.scanbtn .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--surface); display: grid; place-items: center; flex: 0 0 auto; }
+.scanbtn .ic svg { width: 20px; height: 20px; }
+.scanbtn span.t { flex: 1; }
+.scanbtn:disabled { opacity: .6; cursor: default; }
+.toggle { display: flex; gap: 12px; align-items: center; font-size: 16px; color: var(--fg); margin: 0; }
+.toggle input { width: 20px; height: 20px; accent-color: var(--accent); }
+.recs { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -18px; padding: 2px 18px; }
+.rec { flex: 0 0 210px; border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.rec b { font-weight: 600; font-size: 17px; line-height: 1.3; }
+.rec .when { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.rec .why { font-size: 14px; color: var(--fg); opacity: .8; }
+.tag { font-size: 13px; font-weight: 500; padding: 3px 9px; border-radius: 999px; background: var(--surface); color: var(--fg); }
+.review { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 12px 0; border-top: 1px solid var(--line); }
+.review:first-of-type { border-top: 0; padding-top: 0; }
+.review b { font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.review .note { grid-column: 1 / -1; }
+ul.tips { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.thinking { color: var(--muted); }
+.thinking::after { content: ""; display: inline-block; width: 14px; height: 14px; margin-left: 8px; vertical-align: -2px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.disclaimer { font-size: 13px; color: var(--muted); }
+
+/* photos */
+.tipbox { font-size: 14px; color: var(--fg); background: var(--t-mint); border-radius: var(--r-md); padding: 12px 14px; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.thumb { position: relative; aspect-ratio: 3 / 4; max-width: 100%; border-radius: 18px; overflow: hidden; border: 3px solid transparent; padding: 0; background: var(--t-sand); cursor: pointer; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb span { position: absolute; left: 0; right: 0; bottom: 0; font-size: 13px; font-weight: 500; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.55)); padding: 16px 8px 6px; text-align: left; }
+.thumb.sel { border-color: var(--accent); }
+.thumb.sel::after { content: "✓"; position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); font-size: 13px; display: grid; place-items: center; font-weight: 700; }
+.month { font-size: 15px; font-weight: 600; margin: 4px 0 -6px; }
+.viewer img { width: 100%; border-radius: var(--r-md); display: block; max-height: 60vh; object-fit: contain; background: var(--surface-2); }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.compare figure { margin: 0; min-width: 0; }
+.compare img { width: 100%; border-radius: 16px; display: block; aspect-ratio: 3 / 4; object-fit: cover; max-width: 100%; }
+.compare figcaption { font-size: 14px; font-weight: 500; margin-top: 6px; text-align: center; }
+.preview { width: 100%; max-height: 40vh; object-fit: contain; border-radius: var(--r-md); background: var(--surface-2); }
+@media (prefers-reduced-motion: no-preference) { .sheet { animation: up .25s cubic-bezier(.2,.8,.2,1); } @keyframes up { from { transform: translateY(40px); opacity: .5; } } }
+@media (prefers-reduced-motion: reduce) { .thinking::after { animation: none; } }
+
+/* Gaegu sizing: bigger, bolder, tighter so text reads full and clear (kept last so it wins the cascade) */
+body { letter-spacing: -0.045em; word-spacing: 0.05em; }
+h1 { font-size: 44px; } h2 { font-size: 32px; } h3 { font-size: 24px; }
+h1, h2, h3, .banner .txt b, .hero h2, .day b { font-weight: 700; letter-spacing: -0.055em; }
+button, input, select, textarea { letter-spacing: inherit; }
+.banner .txt small, .hero .eyebrow, .day span, .rec .when, label, .lbl { letter-spacing: -0.02em; }
+.sub { font-size: 17px; } .note, .hint, .disclaimer { font-size: 15px; }
+.pcard .nm { font-size: 21px; font-weight: 700; line-height: 1.12; }
+.pcard .mt { font-size: 16px; margin-top: -2px; }
+.step .what b { font-size: 21px; font-weight: 700; line-height: 1.12; }
+.step .what small { font-size: 15px; font-weight: 700; color: var(--muted); }
+.step .what .warn { font-size: 16px; font-weight: 700; }
+.rsum .mid b { font-size: 20px; font-weight: 700; } .rsum .pct { font-size: 19px; font-weight: 700; }
+.pill { font-size: 15px; font-weight: 700; }
+.tab, .seg button { font-size: 19px; font-weight: 700; }
+.btn { font-size: 18px; font-weight: 700; } .btn.big, .formbtns .btn { font-size: 19px; }
+.fab { font-size: 19px; font-weight: 700; }
+.chip { font-size: 17px; font-weight: 700; }
+.alert { font-size: 17px; font-weight: 700; }
+.scanpill .t { font-size: 19px; font-weight: 700; }
+.banner .txt b { font-size: 36px; font-weight: 700; } .banner .txt small { font-size: 17px; font-weight: 700; }
+.hero h2 { font-size: 34px; font-weight: 700; }
+.day b { font-size: 26px; font-weight: 700; } .day span { font-size: 14px; font-weight: 700; }
+.ring span { font-size: 17px; font-weight: 700; }
+.fact span { font-size: 14px; } .fact b { font-size: 19px; font-weight: 700; }
+.rec b, .review b { font-size: 19px; font-weight: 700; } .rec .why { font-size: 16px; } .tag { font-size: 15px; font-weight: 700; }
+label, .lbl { font-size: 16px; font-weight: 700; }
+.month { font-size: 19px; font-weight: 700; } .thumb span { font-size: 15px; font-weight: 700; }
+input[type="text"], input[type="date"], select, textarea { font-size: 18px; }
+.pcard .img .letter, .dimg .letter, .pthumb { font-weight: 700; }
+.pcard .img .letter, .dimg .letter { opacity: .45; }
+
+/* ---------- Backgrounds per page ----------
+   Ombre (colour at the top fading to white): Shelf + Routine — everyday lists, need a calm white reading area.
+   Full colour wash: Skin check + Photos — the "special" moments (AI analysis, your face), so the whole page is tinted. */
+html { min-height: 100%; background: var(--bg); }
+body { min-height: 100vh; }
+body[data-view="shelf"]   { --accent2: #f4b183; }
+body[data-view="routine"] { --accent2: #63c3b0; }
+body[data-view="skin"]    { --accent2: #ef8fb4; --accent3: #7da8f2; }
+body[data-view="photos"]  { --accent2: #f2b07e; --accent3: #8fb6f2; }
+body[data-view="shelf"], body[data-view="routine"] {
+  background:
+    radial-gradient(120% 340px at 85% 0, color-mix(in srgb, var(--accent2) 34%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--accent) 46%, var(--bg)) 0, color-mix(in srgb, var(--accent2) 24%, var(--bg)) 320px, var(--bg) 620px) no-repeat,
+    var(--bg);
+}
+body[data-view="skin"], body[data-view="photos"] {
+  background:
+    radial-gradient(60% 40% at 10% 8%, color-mix(in srgb, var(--accent2) 38%, transparent), transparent 70%),
+    radial-gradient(55% 45% at 95% 40%, color-mix(in srgb, var(--accent) 42%, transparent), transparent 70%),
+    radial-gradient(60% 45% at 20% 95%, color-mix(in srgb, var(--accent3) 34%, transparent), transparent 70%),
+    color-mix(in srgb, var(--accent) 20%, var(--bg));
+  background-attachment: fixed;
+}
+.panel { background: transparent; }
+
+/* frosted glass surfaces */
+body { --glass: color-mix(in srgb, var(--panel) 62%, transparent); --glass-line: color-mix(in srgb, var(--panel) 85%, transparent); }
+body[data-view="shelf"], body[data-view="routine"] { --glass: color-mix(in srgb, var(--panel) 72%, transparent); }
+.panel .card, .panel .empty, .panel .tab, .day, .panel .seg, .panel .rsum, .scanpill, .tipbox, .panel .step .pthumb, .avatar {
+  background-color: var(--glass); border: 1px solid var(--glass-line);
+  -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%);
+}
+.scanpill { background-color: color-mix(in srgb, #9a86e3 18%, var(--glass)); }
+.panel .tab, .day { border-color: var(--line); }
+.panel .tab[aria-selected="true"], .day[aria-pressed="true"] { background-color: var(--accent); border-color: var(--accent); }
+.panel .card .chip { background: color-mix(in srgb, var(--panel) 80%, transparent); }
+.panel .card .chip[aria-pressed="true"] { background: var(--accent); }
+.nav .in { background: color-mix(in srgb, var(--panel) 78%, transparent); -webkit-backdrop-filter: blur(20px) saturate(150%); backdrop-filter: blur(20px) saturate(150%); border-color: var(--glass-line); }
+.step { box-shadow: 0 6px 18px rgba(120, 80, 90, .06); }
+body[data-view="skin"] .hero, body[data-view="photos"] .tipbox { background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+.thumb { border-color: var(--glass-line); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="viewTitle">Hello,</h1>
+      <p class="sub" id="viewSub">Let's take care of your skin</p>
+    </div>
+    <button type="button" class="avatar" id="avatar" aria-label="Open settings"></button>
+  </header>
+  <div class="headx" id="headx" hidden><div class="days" id="days"></div></div>
+
+  <div class="panel">
+  <!-- SHELF / HOME -->
+  <section class="view" id="v-shelf">
+    <div class="bannerwrap">
+      <button type="button" class="banner" id="banner" aria-label="Find the right care for your skin: open skin check">
+        <span class="art" id="bannerArt"></span>
+        <span class="txt"><small>Find the right</small><b>Care for your Skin</b></span>
+      </button>
+      <button type="button" class="bannerEdit" id="bannerEdit" aria-label="Change banner pictures" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></button>
+    </div>
+    <button type="button" class="scanpill" id="scanpill">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M8 12h8"/></svg></span>
+      <span class="t">Get skin tips for you</span><span aria-hidden="true">⟶</span>
+    </button>
+    <button type="button" class="rsum" id="rsum">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.5 3.8 6 7 6 10a6 6 0 0 1-12 0c0-3 2.5-6.2 6-10z"/></svg></span>
+      <span class="mid"><b id="rsumTitle">Daily routine</b><span class="bar"><i id="rsumBar" style="width:0"></i></span></span>
+      <span class="pct" id="rsumPct">0%</span>
+    </button>
+    <div id="alerts" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div class="sechead"><h2>My shelf</h2><span class="note" id="shelfCount"></span></div>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+    <div id="list"><div class="empty">Loading your shelf…</div></div>
+    <p class="note">Expired means whichever comes first: the printed date, or the months-after-opening (the open-jar “12M” symbol) counted from the day you opened it.</p>
+  </section>
+
+  <!-- ROUTINE -->
+  <section class="view" id="v-routine" hidden>
+    <div class="seg" role="group" aria-label="Morning or night">
+      <button type="button" id="seg-am"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>Morning</button>
+      <button type="button" id="seg-pm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Night</button>
+    </div>
+    <div class="rhead"><div><h2 id="rTitle">Monday</h2><p class="note" id="rSub"></p></div><div class="ring" id="ring"><span id="rCount">0/0</span></div></div>
+    <div class="steps" id="steps"></div>
+    <button type="button" class="btn big" id="editRoutine">Edit morning steps</button>
+  </section>
+
+  <!-- SKIN -->
+  <section class="view" id="v-skin" hidden>
+    <div class="hero">
+      <div><p class="eyebrow">Skin tips</p><h2>Find the right care for your skin</h2></div>
+      <div class="face" id="heroFace"></div>
+    </div>
+    <div class="card">
+      <div><span class="lbl">Skin type</span><div class="chips" id="sk-type"></div></div>
+      <div><span class="lbl">What bothers you (pick any)</span><div class="chips" id="sk-concerns"></div></div>
+      <div><span class="lbl">How easily does your skin react?</span><div class="chips" id="sk-sens"></div></div>
+      <div><span class="lbl">Where you spend your days</span><div class="chips" id="sk-climate"></div></div>
+      <div><label for="sk-notes">Anything else</label><textarea id="sk-notes" placeholder="e.g. breakouts on my chin before my period, stinging with toner"></textarea></div>
+    </div>
+    <button type="button" class="scanbtn" id="analyze">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10h.01M15 10h.01M9.5 15c1.4 1 3.6 1 5 0"/></svg></span>
+      <span class="t" id="analyzeLabel">Get my skin tips</span><span aria-hidden="true">→</span>
+    </button>
+    <p class="disclaimer">General cosmetic tips based on your answers, not a medical diagnosis. See a dermatologist for painful acne, rashes or spots that change.</p>
+    <div class="card" id="result" hidden></div>
+  </section>
+
+  <!-- PHOTOS -->
+  <section class="view" id="v-photos" hidden>
+    <div class="tipbox">For fair comparisons, take each photo in the same spot and light, no makeup, face straight to the camera.</div>
+    <div class="actions" id="cmpBar"><button type="button" class="btn" id="cmpBtn">Compare two photos</button><span class="note" id="cmpHint"></span></div>
+    <div id="gallery"><div class="empty">Loading your photos…</div></div>
+  </section>
+  </div>
+</div>
+
+<button class="fab" id="fab" type="button">+ Add product</button>
+<input type="file" id="photoInput" accept="image/*" hidden>
+<input type="file" id="prodPhotoInput" accept="image/*" hidden>
+<input type="file" id="bannerInput" accept="image/png,image/webp,image/*" hidden>
+<input type="file" id="restoreInput" accept="application/json,.json" hidden>
+
+<nav class="nav" aria-label="Sections"><div class="in">
+  <button type="button" data-view="shelf" aria-label="My shelf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg></button>
+  <button type="button" data-view="routine" aria-label="Routine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 14.5l2 2 4-4"/></svg></button>
+  <button type="button" data-view="skin" aria-label="Skin check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10h.01M15 10h.01M9.5 15c1.4 1 3.6 1 5 0"/></svg></button>
+  <button type="button" data-view="photos" aria-label="Photo diary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></button>
+</div></nav>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<!-- Product form -->
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <form id="form" autocomplete="off">
+    <h2 id="sheetTitle">Add product</h2>
+    <div id="f-photoRow">
+      <div class="photofield"><div class="pthumb" id="f-photoPrev"></div>
+        <div class="btns"><button type="button" class="btn primary" id="f-photoPick">Take or choose photo</button><button type="button" class="btn danger" id="f-photoRemove" hidden>Remove photo</button></div>
+      </div>
+      <div class="hint">Snap the front of the bottle so you can see the brand at a glance.</div>
+    </div>
+    <div><label for="f-name">Product name</label><input type="text" id="f-name" placeholder="e.g. Somethinc Niacinamide serum" required></div>
+    <div><label for="f-note">Note</label><input type="text" id="f-note" placeholder="e.g. 2 bottles, 3 sachets"></div>
+    <div><span class="lbl">Type</span><div class="chips" id="f-type"></div></div>
+    <div class="row2">
+      <div><label for="f-exp">Expiry date (on box)</label><input type="date" id="f-exp"></div>
+      <div><label for="f-open">Opened on</label><input type="date" id="f-open"><div class="hint">Empty if still sealed</div></div>
+    </div>
+    <div><span class="lbl">Use within after opening (PAO)</span><div class="chips" id="f-pao"></div></div>
+    <div class="formbtns"><button class="btn" type="button" data-close>Cancel</button><button class="btn primary" type="submit" id="save">Save</button></div>
+  </form>
+</div>
+
+<!-- Routine editor -->
+<div class="sheet" id="rsheet" hidden role="dialog" aria-modal="true" aria-labelledby="rsheetTitle">
+  <div class="inner">
+    <h2 id="rsheetTitle">Edit morning steps</h2>
+    <div class="steps" id="editList"></div>
+    <div class="editstep">
+      <h3>Add a step</h3>
+      <div><label for="r-pick">Product</label><select id="r-pick"></select></div>
+      <div id="r-otherRow" hidden><label for="r-other">Step name</label><input type="text" id="r-other" placeholder="e.g. Ice roller, Lip balm"></div>
+      <button type="button" class="btn primary" id="r-add">Add step</button>
+    </div>
+    <div class="formbtns"><button type="button" class="btn" id="r-sort">Sort in usual order</button><button type="button" class="btn primary" data-close>Done</button></div>
+    <p class="note">Usual order: cleanser, toner, exfoliant, serum, eye cream, moisturizer, then sunscreen in the morning. Tap the day letters to run a step only on some days, like an exfoliant twice a week.</p>
+  </div>
+</div>
+
+<!-- Photo add -->
+<div class="sheet" id="psheet" hidden role="dialog" aria-modal="true" aria-labelledby="psheetTitle">
+  <form id="pform" autocomplete="off">
+    <h2 id="psheetTitle">New photo</h2>
+    <img class="preview" id="pPreview" alt="Photo you are about to save">
+    <div class="row2">
+      <div><label for="p-date">Date</label><input type="date" id="p-date"></div>
+      <div><span class="lbl">Time</span><div class="chips" id="p-when"></div></div>
+    </div>
+    <div><label for="p-note">Note</label><input type="text" id="p-note" placeholder="e.g. Week 2 on niacinamide"></div>
+    <div class="formbtns"><button class="btn" type="button" data-close>Cancel</button><button class="btn primary" type="submit" id="pSave">Save photo</button></div>
+  </form>
+</div>
+
+<!-- Banner pictures -->
+<div class="sheet" id="bsheet" hidden role="dialog" aria-modal="true" aria-labelledby="bsheetTitle">
+  <div class="inner">
+    <h2 id="bsheetTitle">Banner pictures</h2>
+    <p class="note">Add up to 3 cut-out photos of your own skincare. They float on the banner with a soft shadow.</p>
+    <div class="cutlist" id="cutList"></div>
+    <button type="button" class="btn primary big" id="cutAdd">Add cut-out photo</button>
+    <div class="tipbox">
+      <b>How to make a cut-out (transparent background)</b>
+      <ul class="tips" style="margin-top:6px">
+        <li><b>iPhone:</b> open the photo in Photos, touch and hold the bottle until it glows, tap <b>Share → Save Image</b>. Then add that saved image here.</li>
+        <li><b>Mac:</b> in Finder, right-click the photo → <b>Quick Actions → Remove Background</b>. Send the new PNG to your phone or add it here.</li>
+      </ul>
+    </div>
+    <button type="button" class="btn big" data-close>Done</button>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="sheet" id="ssheet" hidden role="dialog" aria-modal="true" aria-labelledby="ssheetTitle">
+  <div class="inner">
+    <h2 id="ssheetTitle">Settings</h2>
+    <div><label for="set-name">Your name</label><input type="text" id="set-name" placeholder="Shown in the greeting" autocomplete="given-name"></div>
+    <div class="card">
+      <h3>Import from Google Sheet</h3>
+      <p class="note">Paste your sheet link. Columns like Name, Category, Status, Expired Date and Notes are picked up. Products with the same name are updated, not duplicated.</p>
+      <input type="text" id="set-sheet" placeholder="https://docs.google.com/spreadsheets/d/…" inputmode="url" autocomplete="off">
+      <button type="button" class="btn primary" id="set-sheetGo">Import</button>
+      <p class="note" id="set-sheetMsg" aria-live="polite"></p>
+    </div>
+    <div class="card">
+      <h3>Backup</h3>
+      <p class="note">Everything is saved only on this phone. Export a backup now and then, and before you clear browser data or switch phones.</p>
+      <p class="note" id="set-stats"></p>
+      <div class="actions"><button type="button" class="btn primary" id="set-export">Export backup</button><button type="button" class="btn" id="set-import">Restore backup</button></div>
+      <div id="set-restoreRow" hidden class="alert bad" style="display:flex;flex-direction:column;gap:10px">
+        <span id="set-restoreMsg"></span>
+        <div class="actions"><button type="button" class="btn danger" id="set-restoreYes">Replace with backup</button><button type="button" class="btn" id="set-restoreNo">Cancel</button></div>
+      </div>
+    </div>
+    <button type="button" class="btn big" data-close>Done</button>
+  </div>
+</div>
+
+<!-- Viewer / product detail -->
+<div class="sheet" id="vsheet" hidden role="dialog" aria-modal="true" aria-label="Details">
+  <div class="inner viewer" id="vInner"></div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const TYPES = ["Cleanser","Toner","Mist","Exfoliant","Booster","Serum","Spot gel","Eye cream","Moisturizer","Sunscreen","Mask","Lip care","Body care","Armpit care","Hair care","Vitamins","Other"];
+const ORDER = {Cleanser:1, Toner:2, Mist:3, Exfoliant:4, Booster:5, Serum:6, "Spot gel":7, "Eye cream":8, Moisturizer:9, Sunscreen:10, Mask:11, "Lip care":12, "Body care":13, "Armpit care":14, "Hair care":15, Vitamins:16, Other:17};
+const PAOS = [3,6,12,18,24,36];
+const SHELF_TABS = [{key:"use",label:"In use"},{key:"new",label:"New"},{key:"bad",label:"Expired"},{key:"done",label:"Finished"}];
+const DAYS = ["S","M","T","W","T","F","S"];
+const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const SKIN_TYPES = ["Oily","Dry","Combination","Normal","Not sure"];
+const CONCERNS = ["Acne / breakouts","Blackheads","Dark spots","Redness","Dryness / flaking","Oiliness","Large pores","Dull skin","Uneven texture","Fine lines","Dark circles"];
+const SENS = ["Rarely","Sometimes","Often stings or turns red"];
+const CLIMATES = ["Hot & humid","Air-conditioned indoors","Dry / cold","Lots of sun"];
+const REC_TINTS = ["t-Serum","t-Cleanser","t-Moisturizer","t-Toner","t-Eye-cream","t-Sunscreen"];
+
+let items = [], routine = {am: [], pm: []}, logs = {}, skin = {}, photos = [];
+let tab = "use", view = "shelf", slot = new Date().getHours() < 15 ? "am" : "pm";
+let db = null, col = null, assets = null, sample = null, canWrite = true, sampleImages = false, firstName = "";
+let editingId = null, formType = "Serum", formPao = 12, formPhoto = {id: "", blob: null};
+let compareMode = false, compareSel = [], pendingPhoto = null, photoWhen = "Morning";
+let selDate = null, loaded = false;
+
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const pad = n => String(n).padStart(2,"0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { if (!s) return null; const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const addMonths = (d, m) => { const r = new Date(d); const day = r.getDate(); r.setDate(1); r.setMonth(r.getMonth()+m); const last = new Date(r.getFullYear(), r.getMonth()+1, 0).getDate(); r.setDate(Math.min(day,last)); return r; };
+const today0 = () => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); };
+const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+const DAY = 86400000;
+const fmt = d => d.toLocaleDateString(undefined, {day:"numeric", month:"short", year:"numeric"});
+const fmtShort = d => d.toLocaleDateString(undefined, {day:"numeric", month:"short"});
+const uid = () => Math.random().toString(36).slice(2, 10);
+const tint = type => "t-" + String(type || "Other").replace(/\s+/g, "-");
+const letterOf = name => ((name || "?").trim().charAt(0) || "?").toUpperCase();
+const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const FACE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4.4 0 7 3.4 7 8 0 5-3.2 10-7 10s-7-5-7-10c0-4.6 2.6-8 7-8z"/><path d="M9.5 11h.01M14.5 11h.01M10 16c1.2.8 2.8.8 4 0"/></svg>';
+selDate = iso(today0());
+
+// ---------- writes, one at a time per document
+const queues = {};
+function writeDoc(path, fn) { const p = (queues[path] || Promise.resolve()).then(fn).catch(handleWriteError); queues[path] = p; return p; }
+function handleWriteError(e) {
+  if (e && e.code === "invalid_argument") { canWrite = false; renderAll(); toast("You can view this page but not change it"); }
+  else if (e && e.code === "quota_exceeded") toast("Storage is full. Delete some finished products or old photos.");
+  else toast("Couldn't save. Check your connection and try again.");
+}
+let toastTimer;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 2600); }
+
+// ---------- sheets
+function openSheet(id) { $("#scrim").hidden = false; $(id).hidden = false; }
+function closeSheets() { $("#scrim").hidden = true; document.querySelectorAll(".sheet").forEach(s => s.hidden = true); pendingPhoto = null; }
+$("#scrim").onclick = closeSheets;
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheets(); });
+
+function chips(container, values, current, labelFn, onPick, multi) {
+  container.textContent = "";
+  values.forEach(v => {
+    const b = el("button", "chip", labelFn(v)); b.type = "button";
+    b.setAttribute("aria-pressed", String(multi ? current.includes(v) : v === current));
+    b.onclick = () => {
+      if (multi) { const i = current.indexOf(v); i >= 0 ? current.splice(i,1) : current.push(v); onPick(current); }
+      else { onPick(v); current = v; }
+      chips(container, values, current, labelFn, onPick, multi);
+    };
+    container.append(b);
+  });
+}
+
+// ---------- header + navigation
+function renderHeader() {
+  const t = $("#viewTitle"), s = $("#viewSub"); t.textContent = "";
+  if (view === "shelf") { t.append("Hello"); if (firstName) { t.append(" "); t.append(el("b", null, firstName)); } t.append(","); s.textContent = "Let's take care of your skin"; }
+  if (view === "routine") { t.append(el("b", null, "Daily routine")); s.textContent = parse(selDate).toLocaleDateString(undefined, {month: "long", year: "numeric"}); }
+  if (view === "skin") { t.append(el("b", null, "Skin check")); s.textContent = "Tell us about your skin, get matched care"; }
+  if (view === "photos") { t.append(el("b", null, "Photo diary")); s.textContent = photos.length ? `${photos.length} photo${photos.length>1?"s":""} so far` : "Track how your skin changes"; }
+  const av = $("#avatar"); av.textContent = "";
+  if (photos[0]) { const i = el("img"); i.src = blobURL(photos[0].assetId); i.alt = ""; i.onerror = () => { av.textContent = letterOf(firstName || "Me"); }; av.append(i); }
+  else av.textContent = firstName ? letterOf(firstName) : "";
+  if (!photos[0] && !firstName) av.innerHTML = FACE_SVG;
+}
+$("#avatar").onclick = () => { location.hash = "photos"; };
+function setView(v) {
+  if (!["shelf","routine","skin","photos"].includes(v)) v = "shelf";
+  view = v;
+  ["shelf","routine","skin","photos"].forEach(k => $("#v-"+k).hidden = k !== v);
+  document.body.dataset.view = v;
+  $("#headx").hidden = v !== "routine";
+  document.querySelectorAll(".nav button").forEach(b => { if (b.dataset.view === v) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
+  const fab = $("#fab");
+  fab.hidden = !canWrite || !(v === "shelf" || (v === "photos" && assets));
+  fab.textContent = v === "photos" ? "+ Add photo" : "+ Add product";
+  renderAll(); window.scrollTo(0, 0);
+}
+document.querySelectorAll(".nav button").forEach(b => b.onclick = () => { location.hash = b.dataset.view; });
+window.addEventListener("hashchange", () => setView(location.hash.slice(1)));
+$("#fab").onclick = () => view === "photos" ? $("#photoInput").click() : openProduct(null);
+$("#rsum").onclick = () => { selDate = iso(today0()); location.hash = "routine"; };
+$("#banner").onclick = $("#scanpill").onclick = () => { location.hash = "skin"; };
+function renderCutList() {
+  const list = $("#cutList"); list.textContent = "";
+  if (!bannerCuts.length) list.append(el("div", "empty", "No pictures yet. The banner shows a bottle drawing until you add one."));
+  bannerCuts.forEach((id, i) => {
+    const box = el("div", "cutitem"); const img = el("img"); img.src = blobURL(id); img.alt = `Banner picture ${i + 1}`;
+    const rm = el("button", "iconbtn", "✕"); rm.type = "button"; rm.setAttribute("aria-label", `Remove picture ${i + 1}`);
+    rm.onclick = () => { const next = bannerCuts.filter(x => x !== id); saveBanner(next); if (assets) assets.delete(id).catch(() => {}); };
+    box.append(img, rm); list.append(box);
+  });
+  $("#cutAdd").disabled = bannerCuts.length >= 3;
+  $("#cutAdd").textContent = bannerCuts.length >= 3 ? "3 pictures max. Remove one to add another" : "Add cut-out photo";
+}
+function saveBanner(next) {
+  bannerCuts = next; renderBanner(); renderCutList();
+  if (db) writeDoc("settings/banner", () => db.doc("settings/banner").set({cuts: next.slice()}));
+}
+$("#bannerEdit").onclick = () => { renderCutList(); openSheet("#bsheet"); };
+$("#cutAdd").onclick = () => $("#bannerInput").click();
+// keep transparency: resize to PNG, and check whether the corners are see-through
+async function toCutout(file, max = 900) {
+  const bmp = await createImageBitmap(file, {imageOrientation: "from-image"});
+  const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * scale); cv.height = Math.round(bmp.height * scale);
+  const ctx = cv.getContext("2d"); ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  const corners = [[0,0],[cv.width-1,0],[0,cv.height-1],[cv.width-1,cv.height-1]].map(([x,y]) => ctx.getImageData(x, y, 1, 1).data[3]);
+  const transparent = corners.filter(a => a < 20).length >= 3;
+  const blob = await new Promise(r => cv.toBlob(b => r(b), "image/png"));
+  return {blob, transparent};
+}
+$("#bannerInput").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = "";
+  if (!f || !assets) return;
+  const btn = $("#cutAdd"); btn.disabled = true; btn.textContent = "Uploading…";
+  try {
+    const {blob, transparent} = await toCutout(f);
+    const up = await assets.upload(blob, {type: "image/png"});
+    saveBanner(bannerCuts.concat(up.id).slice(0, 3));
+    toast(transparent ? "Added to your banner" : "Added, but it still has a background. See the tips below to cut it out.");
+  } catch (err) {
+    const msg = {too_large: "That picture is too big. Try a smaller one.", unsupported_type: "Use a PNG or JPEG picture.", quota_or_state: "Storage is full. Delete some old photos first."}[err && err.code];
+    toast(msg || "Couldn't add that picture. Try again.");
+  } finally { renderCutList(); }
+});
+const BOTTLE_SVG = '<svg viewBox="0 0 60 100" aria-hidden="true"><rect x="22" y="2" width="16" height="18" rx="3" fill="#2b2a2e"/><rect x="8" y="18" width="44" height="80" rx="12" fill="#cfeee6"/><rect x="16" y="42" width="28" height="22" rx="4" fill="#ffffff" opacity=".85"/><rect x="20" y="48" width="20" height="3" rx="1.5" fill="#9fc9bf"/><rect x="20" y="55" width="14" height="3" rx="1.5" fill="#9fc9bf"/></svg>';
+let bannerCuts = [];   // asset ids of transparent cut-out photos
+function renderBanner() {
+  const art = $("#bannerArt"); art.textContent = "";
+  $("#bannerEdit").hidden = !(canWrite && assets);
+  art.classList.toggle("cut", bannerCuts.length > 0);
+  if (bannerCuts.length) {
+    const n = Math.min(bannerCuts.length, 3);
+    bannerCuts.slice(0, 3).forEach((id, i) => {
+      const img = el("img"); img.src = blobURL(id); img.alt = ""; img.className = `c${n}-${i}`;
+      img.onerror = () => img.remove();
+      art.append(img);
+    });
+    return;
+  }
+  const withPhoto = items.find(p => p.photoId && ["use","new"].includes(statusOf(p).key));
+  if (withPhoto) { const i = el("img"); i.src = blobURL(withPhoto.photoId); i.alt = ""; i.onerror = () => { art.innerHTML = BOTTLE_SVG; }; art.append(i); }
+  else art.innerHTML = BOTTLE_SVG;
+}
+
+function renderAll() {
+  renderHeader();
+  if (view === "shelf") renderShelf();
+  if (view === "routine") renderRoutine();
+  if (view === "skin") renderSkin();
+  if (view === "photos") renderPhotos();
+}
+
+// ================= SHELF =================
+function statusOf(p) {
+  const t = today0(), exp = parse(p.expiry), opened = parse(p.opened);
+  const paoEnd = opened && p.pao ? addMonths(opened, p.pao) : null;
+  let goodUntil = exp;
+  if (paoEnd && (!goodUntil || paoEnd < goodUntil)) goodUntil = paoEnd;
+  const daysLeft = goodUntil ? Math.round((goodUntil - t) / DAY) : null;
+  let key, label, cls;
+  if (p.finished) { key = "done"; label = "Finished"; cls = "s-done"; }
+  else if (daysLeft !== null && daysLeft < 0) { key = "bad"; label = "Expired"; cls = "s-bad"; }
+  else if (!opened) { key = "new"; label = "New"; cls = "s-new"; }
+  else { key = "use"; label = "In use"; cls = "s-use"; }
+  const soon = key !== "done" && key !== "bad" && daysLeft !== null && daysLeft <= 30;
+  if (soon) cls = "s-soon";
+  let progress = null;
+  if (key === "use" && opened && goodUntil) { const total = goodUntil - opened; progress = total > 0 ? Math.min(1, Math.max(0, (t - opened) / total)) : 1; }
+  return {key, label, cls, goodUntil, daysLeft, soon, progress, reason: paoEnd && goodUntil === paoEnd ? "after opening" : "printed date"};
+}
+
+function renderShelf() {
+  renderBanner();
+  // routine summary
+  const k = new Date().getHours() < 15 ? "am" : "pm";
+  const st = stepsFor(k, today0()), done = ((logs[iso(today0())] || {})[k] || []).filter(id => st.some(s => s.id === id)).length;
+  const pct = st.length ? Math.round(done / st.length * 100) : 0;
+  $("#rsumTitle").textContent = (k === "am" ? "Morning" : "Night") + " routine";
+  $("#rsumBar").style.width = pct + "%"; $("#rsumPct").textContent = st.length ? pct + "%" : "Set up";
+
+  const enriched = items.map(p => ({p, s: statusOf(p)}));
+  const counts = {use:0,new:0,bad:0,done:0};
+  enriched.forEach(e => counts[e.s.key]++);
+  $("#shelfCount").textContent = `${counts.use + counts.new} usable`;
+  const soon = enriched.filter(e => e.s.soon), bad = enriched.filter(e => e.s.key === "bad");
+  const al = $("#alerts"); al.textContent = "";
+  if (bad.length) al.append(el("div", "alert bad", `${bad.length} product${bad.length>1?"s have":" has"} expired. Time to toss ${bad.length>1?"them":"it"}.`));
+  if (soon.length) al.append(el("div", "alert", `Use up soon: ${soon.map(e => `${e.p.name} (${e.s.daysLeft} day${e.s.daysLeft===1?"":"s"})`).join(", ")}`));
+
+  const tb = $("#tabs"); tb.textContent = "";
+  SHELF_TABS.forEach(t => {
+    const b = el("button", "tab"); b.type = "button"; b.setAttribute("role","tab");
+    b.setAttribute("aria-selected", String(t.key === tab));
+    b.append(el("span", null, t.label), el("span", "n", counts[t.key]));
+    b.onclick = () => { tab = t.key; renderShelf(); };
+    tb.append(b);
+  });
+
+  const list = $("#list"); list.textContent = "";
+  let shown = enriched.filter(e => e.s.key === tab);
+  shown.sort((a,b) => (a.s.daysLeft ?? 1e9) - (b.s.daysLeft ?? 1e9));
+  if (tab === "done") shown.sort((a,b) => (b.p.finished||"").localeCompare(a.p.finished||""));
+  if (loaded && !items.length) {
+    const w = el("div", "card"); w.style.textAlign = "center";
+    w.append(el("h3", null, "Welcome to your shelf"), el("p", "note", "Bring in your products from your Google Sheet, restore a backup, or add them one by one with + Add product."));
+    const b = el("button", "btn primary big", "Import my products"); b.type = "button"; b.onclick = openSettings; w.append(b);
+    list.append(w); return;
+  }
+  if (!shown.length) {
+    const msg = {use:"Nothing open right now. Tap a new product and choose Open it today when you start using it.", new:"No sealed products. Tap + Add product after you buy something.", bad:"Nothing expired. Nice.", done:"Products you finish land here, so you remember what you liked."}[tab];
+    list.append(el("div", "empty", loaded ? msg : "Loading your shelf…")); return;
+  }
+  const grid = el("div", "pgrid");
+  shown.forEach(({p, s}) => grid.append(productTile(p, s)));
+  list.append(grid);
+}
+
+function imgOrLetter(box, p) {
+  if (p && p.photoId) {
+    const img = el("img"); img.src = blobURL(p.photoId); img.alt = ""; img.loading = "lazy";
+    img.onerror = () => { img.replaceWith(el("span", "letter", letterOf(p.name))); };
+    box.append(img);
+  } else box.append(el("span", "letter", letterOf(p && p.name)));
+}
+function productTile(p, s) {
+  const b = el("button", "pcard"); b.type = "button"; b.setAttribute("aria-label", `${p.name}, ${s.label}`);
+  const img = el("div", "img " + tint(p.type)); imgOrLetter(img, p);
+  img.append(el("span", "pill " + s.cls, s.soon ? `${s.daysLeft}d left` : s.label));
+  if (s.progress !== null) { const l = el("div", "life" + (s.soon ? " soon" : "")); const i = el("i"); i.style.width = Math.round(s.progress*100) + "%"; l.append(i); img.append(l); }
+  let mt = p.type || "Other";
+  if (s.key === "done") mt = "Finished " + fmtShort(parse(p.finished));
+  else if (s.key === "bad") mt = "Expired " + fmtShort(s.goodUntil);
+  else if (s.goodUntil) mt += " · until " + fmtShort(s.goodUntil);
+  b.append(img, el("div", "nm", p.name), el("div", "mt", mt));
+  b.onclick = () => showProduct(p.id);
+  return b;
+}
+function smallThumb(p) {
+  const t = el("div", "pthumb");
+  if (p && p.photoId) { const img = el("img"); img.src = blobURL(p.photoId); img.alt = ""; img.loading = "lazy"; img.onerror = () => { t.textContent = letterOf(p.name); }; t.append(img); }
+  else t.textContent = letterOf(p && p.name);
+  return t;
+}
+
+function showProduct(id) {
+  const p = items.find(x => x.id === id); if (!p) { closeSheets(); return; }
+  const s = statusOf(p);
+  const v = $("#vInner"); v.textContent = "";
+  const img = el("div", "dimg " + tint(p.type)); imgOrLetter(img, p);
+  const head = el("div"); head.style.display = "flex"; head.style.justifyContent = "space-between"; head.style.gap = "10px"; head.style.alignItems = "flex-start";
+  const ht = el("div"); ht.style.minWidth = "0"; ht.append(el("h2", null, p.name), el("p", "note", p.type || "Other"));
+  head.append(ht, el("span", "pill " + s.cls, s.soon ? `${s.daysLeft} days left` : s.label));
+  const facts = el("div", "facts");
+  const fact = (k, val) => { const f = el("div", "fact"); f.append(el("span", null, k), el("b", null, val)); facts.append(f); };
+  fact("Opened", p.opened ? (p.source && p.opened === p.added ? "Before " + fmt(parse(p.opened)) : fmt(parse(p.opened))) : "Still sealed");
+  fact(s.key === "bad" ? "Expired on" : "Good until", s.goodUntil ? fmt(s.goodUntil) : "Not set");
+  fact("After opening", p.pao ? `${p.pao} months` : "Not set");
+  if (p.note) fact("Note", p.note);
+  const inR = ["am","pm"].filter(k => routine[k].some(st => st.productId === p.id)).map(k => k === "am" ? "Morning" : "Night");
+  fact(s.key === "done" ? "Finished" : "Routine", s.key === "done" ? fmt(parse(p.finished)) : (inR.join(" & ") || "Not in a routine"));
+  v.append(img, head, facts);
+  if (s.goodUntil && p.opened && p.pao && s.key !== "done") v.append(el("p", "note", `Date based on the ${s.reason}.`));
+  if (canWrite) {
+    const a = el("div", "actions"); a.style.flexDirection = "column"; a.style.alignItems = "stretch";
+    const mk = (txt, cls, fn) => { const b = el("button", "btn big " + cls, txt); b.type = "button"; b.onclick = fn; a.append(b); };
+    if (s.key === "new") mk("Open it today", "primary", () => updateProduct(p.id, {opened: iso(today0())}, "Marked as opened"));
+    if (s.key === "use") mk("Finished / empty", "primary", () => updateProduct(p.id, {finished: iso(today0())}, "Moved to Finished"));
+    if (s.key === "bad") mk("Tossed it", "primary", () => updateProduct(p.id, {finished: iso(today0())}, "Moved to Finished"));
+    if (s.key === "done") mk("Bought again", "primary", () => openProduct({name: p.name, type: p.type, pao: p.pao, photoId: p.photoId || ""}, true));
+    mk("Edit details", "", () => openProduct(p));
+    if (s.key === "done" || s.key === "bad") {
+      const row = el("div", "actions"); const del = el("button", "btn danger", "Delete"); del.type = "button";
+      del.onclick = () => confirmRow(row, "Delete for good?", async () => { await col.doc(p.id).delete(); closeSheets(); toast("Deleted"); }, () => showProduct(p.id));
+      row.append(del); a.append(row);
+    }
+    v.append(a);
+  }
+  closeSheets(); openSheet("#vsheet");
+}
+function confirmRow(row, question, action, onKeep) {
+  row.textContent = "";
+  const t = el("span", null, question); t.style.fontWeight = "500";
+  const y = el("button", "btn danger", "Delete"); y.type = "button";
+  y.onclick = async () => { y.disabled = true; try { await action(); } catch (e) { toast("Couldn't delete. Try again."); onKeep && onKeep(); } };
+  const n = el("button", "btn", "Keep"); n.type = "button"; n.onclick = () => onKeep ? onKeep() : renderAll();
+  row.append(t, y, n);
+}
+function updateProduct(id, patch, msg) {
+  if (!col) { toast("Saving isn't available here"); return; }
+  closeSheets();
+  writeDoc("products/"+id, async () => { await col.doc(id).update(patch); toast(msg); });
+}
+
+// product form
+function renderFormPhoto() {
+  const prev = $("#f-photoPrev"); prev.textContent = "";
+  const src = formPhoto.blob ? URL.createObjectURL(formPhoto.blob) : formPhoto.id ? blobURL(formPhoto.id) : "";
+  if (src) { const img = el("img"); img.src = src; img.alt = "Product photo"; prev.append(img); } else prev.textContent = "+";
+  $("#f-photoPick").textContent = src ? "Change photo" : "Take or choose photo";
+  $("#f-photoRemove").hidden = !src;
+}
+$("#f-photoPick").onclick = () => $("#prodPhotoInput").click();
+$("#f-photoRemove").onclick = () => { formPhoto = {id: "", blob: null}; renderFormPhoto(); };
+$("#prodPhotoInput").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = "";
+  if (!f) return; formPhoto = {id: "", blob: await shrink(f, 800)}; renderFormPhoto();
+});
+function openProduct(p, asNew) {
+  closeSheets();
+  editingId = p && !asNew ? p.id : null;
+  $("#sheetTitle").textContent = editingId ? "Edit product" : (asNew ? "Bought again" : "Add product");
+  $("#f-name").value = p ? p.name : "";
+  $("#f-note").value = p && !asNew ? (p.note || "") : "";
+  $("#f-exp").value = p && !asNew ? (p.expiry || "") : "";
+  $("#f-open").value = p && !asNew ? (p.opened || "") : "";
+  formType = p && p.type ? p.type : "Serum"; formPao = p && p.pao ? p.pao : 12;
+  chips($("#f-type"), TYPES, formType, v => v, v => formType = v);
+  chips($("#f-pao"), PAOS, formPao, v => v + "M", v => formPao = v);
+  formPhoto = {id: (p && p.photoId) || "", blob: null};
+  $("#f-photoRow").hidden = !assets; renderFormPhoto();
+  openSheet("#sheet");
+}
+$("#form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("#f-name").value.trim();
+  if (!name) { $("#f-name").focus(); return; }
+  const data = { name, type: formType, pao: formPao, expiry: $("#f-exp").value || "", opened: $("#f-open").value || "", note: $("#f-note").value.trim() };
+  if (!col) { toast("Saving isn't available here"); return; }
+  $("#save").disabled = true;
+  try {
+    if (formPhoto.blob && assets) {
+      $("#save").textContent = "Uploading photo…";
+      const type = ["image/jpeg","image/png","image/webp","image/gif"].includes(formPhoto.blob.type) ? undefined : "image/jpeg";
+      const up = await assets.upload(formPhoto.blob, type ? {type} : undefined);
+      formPhoto = {id: up.id, blob: null};
+    }
+    data.photoId = formPhoto.id || "";
+    if (editingId) { await col.doc(editingId).update(data); toast("Saved"); }
+    else { await col.add({...data, finished: "", added: iso(today0())}); tab = data.opened ? "use" : "new"; toast("Added to your shelf"); }
+    closeSheets();
+  } catch (err) {
+    const msg = {too_large: "That photo is too big. Try a smaller one.", unsupported_type: "That file type isn't supported. Use a JPEG or PNG photo.", quota_or_state: "Photo storage is full. Delete some old photos first."}[err && err.code];
+    if (msg) toast(msg); else handleWriteError(err);
+  } finally { $("#save").disabled = false; $("#save").textContent = "Save"; renderAll(); }
+});
+
+// ================= ROUTINE =================
+const productById = id => items.find(p => p.id === id);
+function stepInfo(st) {
+  const p = st.productId ? productById(st.productId) : null;
+  const name = p ? p.name : (st.label || "Removed product");
+  const type = p ? p.type : (st.type || "Other");
+  let warn = "";
+  if (st.productId && !p) warn = "Product was deleted. Pick a new one.";
+  else if (p) { const s = statusOf(p); if (s.key === "bad") warn = "Expired. Replace it."; else if (s.key === "done") warn = "Marked finished. Replace it."; else if (s.soon) warn = `Use up within ${s.daysLeft} days`; }
+  return {name, type, warn, p};
+}
+const stepsFor = (k, date) => { const d = date.getDay(); return routine[k].filter(st => !st.days || st.days.includes(d)); };
+function dayState(key) {
+  const l = logs[key]; if (!l) return "";
+  const total = (l.amTotal || 0) + (l.pmTotal || 0), got = (l.am || []).length + (l.pm || []).length;
+  if (!got) return ""; return total && got >= total ? "full" : "part";
+}
+function renderRoutine() {
+  // date strip: 5 days back, today, 1 ahead
+  const strip = $("#days"); strip.textContent = "";
+  const t0 = today0();
+  for (let i = -5; i <= 1; i++) {
+    const d = addDays(t0, i), key = iso(d);
+    const b = el("button", "day" + (i > 0 ? " future" : "")); b.type = "button";
+    b.setAttribute("aria-pressed", String(key === selDate));
+    b.setAttribute("aria-label", d.toLocaleDateString(undefined, {weekday: "long", day: "numeric", month: "long"}));
+    b.append(el("b", null, d.getDate()), el("span", null, i === 0 ? "Today" : DAY_NAMES[d.getDay()].slice(0,3)), el("i", dayState(key)));
+    b.onclick = () => { selDate = key; renderAll(); };
+    strip.append(b);
+  }
+  const selBtn = strip.querySelector('[aria-pressed="true"]');
+  if (selBtn) requestAnimationFrame(() => { strip.scrollLeft = selBtn.offsetLeft - strip.offsetLeft - strip.clientWidth / 2 + selBtn.offsetWidth / 2; });
+  const date = parse(selDate), isFuture = date > t0, isToday = selDate === iso(t0);
+  $("#seg-am").setAttribute("aria-pressed", String(slot === "am"));
+  $("#seg-pm").setAttribute("aria-pressed", String(slot === "pm"));
+  const word = slot === "am" ? "Morning" : "Night";
+  $("#rTitle").textContent = (isToday ? "Today" : DAY_NAMES[date.getDay()]) + ", " + fmtShort(date);
+  $("#editRoutine").textContent = `Edit ${word.toLowerCase()} steps`;
+  $("#editRoutine").hidden = !canWrite;
+  const done = (logs[selDate] && logs[selDate][slot]) || [];
+  const steps = stepsFor(slot, date);
+  const skipped = routine[slot].length - steps.length;
+  $("#rSub").textContent = `${word} routine` + (skipped ? ` · ${skipped} step${skipped>1?"s":""} off today` : "") + (isFuture ? " · coming up" : "");
+  const doneCount = steps.filter(st => done.includes(st.id)).length;
+  $("#rCount").textContent = `${doneCount}/${steps.length}`;
+  $("#ring").style.setProperty("--p", steps.length ? Math.round(doneCount / steps.length * 100) : 0);
+  const box = $("#steps"); box.textContent = "";
+  if (!routine[slot].length) box.append(el("div", "empty", loaded ? `No ${word.toLowerCase()} steps yet. Tap Edit ${word.toLowerCase()} steps to build your routine from your shelf.` : "Loading your routine…"));
+  else if (!steps.length) box.append(el("div", "empty", `Nothing scheduled this ${word.toLowerCase()}. Rest day for your skin.`));
+  steps.forEach((st, i) => {
+    const info = stepInfo(st), isDone = done.includes(st.id);
+    const row = el("div", "step " + tint(info.type) + (isDone ? " done" : ""));
+    const what = el("div", "what"); what.append(el("small", null, `Step ${i + 1} · ${info.type}`), el("b", null, info.name));
+    if (info.warn) what.append(el("span", "warn", info.warn));
+    const c = el("button", "check"); c.type = "button"; c.setAttribute("role","checkbox"); c.setAttribute("aria-checked", String(isDone)); c.setAttribute("aria-label", "Done: " + info.name);
+    c.innerHTML = isDone ? CHECK_SVG : ""; c.disabled = !canWrite || isFuture;
+    c.onclick = () => toggleStep(st.id);
+    row.append(smallThumb(info.p || {name: info.name}), what, c);
+    box.append(row);
+  });
+  if (steps.length && doneCount === steps.length) box.append(el("div", "alert info", `${word} routine done. Your skin thanks you!`));
+  if (slot === "am" && routine.am.length && !routine.am.some(st => stepInfo(st).type === "Sunscreen")) box.append(el("div", "alert", "No sunscreen in your morning routine. It's the step that protects everything else."));
+}
+function toggleStep(stepId) {
+  if (!db) return;
+  const key = selDate, date = parse(key);
+  const cur = logs[key] || {date: key, am: [], pm: []};
+  const list = (cur[slot] || []).slice();
+  const i = list.indexOf(stepId); i >= 0 ? list.splice(i, 1) : list.push(stepId);
+  const next = {...cur, date: key, [slot]: list, amTotal: stepsFor("am", date).length, pmTotal: stepsFor("pm", date).length};
+  logs[key] = next; renderRoutine();
+  writeDoc("log/"+key, () => db.collection("log").doc(key).set(next));
+}
+$("#seg-am").onclick = () => { slot = "am"; renderRoutine(); };
+$("#seg-pm").onclick = () => { slot = "pm"; renderRoutine(); };
+
+function saveRoutine() { const snap = JSON.parse(JSON.stringify(routine)); writeDoc("settings/routine", () => db.doc("settings/routine").set(snap)); }
+$("#editRoutine").onclick = () => { renderEditor(); openSheet("#rsheet"); };
+function renderEditor() {
+  const word = slot === "am" ? "morning" : "night";
+  $("#rsheetTitle").textContent = `Edit ${word} steps`;
+  const list = $("#editList"); list.textContent = "";
+  const steps = routine[slot];
+  if (!steps.length) list.append(el("div", "empty", `No ${word} steps yet. Add your first one below.`));
+  steps.forEach((st, i) => {
+    const info = stepInfo(st);
+    const box = el("div", "editstep");
+    const top = el("div", "row"); const th = smallThumb(info.p || {name: info.name}); th.style.width = th.style.height = "56px"; th.style.borderRadius = "14px";
+    top.append(th, el("b", null, info.name));
+    const mkb = (txt, label, dis, fn) => { const b = el("button", "iconbtn", txt); b.type = "button"; b.disabled = dis; b.setAttribute("aria-label", label); b.onclick = fn; top.append(b); return b; };
+    mkb("↑", "Move up", i === 0, () => { [steps[i-1], steps[i]] = [steps[i], steps[i-1]]; saveRoutine(); renderEditor(); });
+    mkb("↓", "Move down", i === steps.length - 1, () => { [steps[i+1], steps[i]] = [steps[i], steps[i+1]]; saveRoutine(); renderEditor(); });
+    mkb("✕", "Remove step", false, () => { steps.splice(i, 1); saveRoutine(); renderEditor(); }).style.color = "var(--bad)";
+    const days = el("div", "chips");
+    DAYS.forEach((d, di) => {
+      const b = el("button", "chip sm", d); b.type = "button"; b.setAttribute("aria-label", DAY_NAMES[di]);
+      b.setAttribute("aria-pressed", String(!st.days || st.days.includes(di)));
+      b.onclick = () => {
+        let ds = st.days ? st.days.slice() : [0,1,2,3,4,5,6];
+        ds = ds.includes(di) ? ds.filter(x => x !== di) : ds.concat(di).sort();
+        if (!ds.length) { toast("Keep at least one day, or remove the step"); return; }
+        st.days = ds.length === 7 ? null : ds; saveRoutine(); renderEditor();
+      };
+      days.append(b);
+    });
+    box.append(top, days);
+    if (info.warn) { const w = el("span", "note", info.warn); w.style.color = "var(--bad)"; box.append(w); }
+    list.append(box);
+  });
+  const pick = $("#r-pick"); pick.textContent = "";
+  items.filter(p => ["use","new"].includes(statusOf(p).key)).sort((a,b) => (ORDER[a.type]||9) - (ORDER[b.type]||9))
+    .forEach(p => { const o = el("option", null, `${p.name} · ${p.type}${statusOf(p).key === "new" ? " (sealed)" : ""}`); o.value = p.id; pick.append(o); });
+  const o = el("option", null, "Something not on my shelf…"); o.value = "__other"; pick.append(o);
+  $("#r-otherRow").hidden = pick.value !== "__other";
+}
+$("#r-pick").onchange = () => { $("#r-otherRow").hidden = $("#r-pick").value !== "__other"; };
+$("#r-add").onclick = () => {
+  const v = $("#r-pick").value;
+  if (v === "__other") {
+    const label = $("#r-other").value.trim(); if (!label) { $("#r-other").focus(); return; }
+    routine[slot].push({id: uid(), productId: null, label, type: "Other", days: null}); $("#r-other").value = "";
+  } else {
+    if (routine[slot].some(st => st.productId === v)) { toast("That product is already in this routine"); return; }
+    routine[slot].push({id: uid(), productId: v, days: null});
+  }
+  saveRoutine(); renderEditor();
+};
+$("#r-sort").onclick = () => { routine[slot].sort((a,b) => (ORDER[stepInfo(a).type]||9) - (ORDER[stepInfo(b).type]||9)); saveRoutine(); renderEditor(); toast("Sorted"); };
+
+// ================= SKIN (offline tips, no AI) =================
+let profile = {type: "", concerns: [], sens: "", climate: [], notes: ""};
+let analyzing = null;
+function renderSkin() {
+  const face = $("#heroFace"); face.textContent = "";
+  if (photos[0]) { const i = el("img"); i.src = blobURL(photos[0].assetId); i.alt = ""; i.onerror = () => { face.innerHTML = FACE_SVG; }; face.append(i); } else face.innerHTML = FACE_SVG;
+  chips($("#sk-type"), SKIN_TYPES, profile.type, v => v, v => { profile.type = v; saveProfile(); });
+  chips($("#sk-concerns"), CONCERNS, profile.concerns, v => v, v => { profile.concerns = v; saveProfile(); }, true);
+  chips($("#sk-sens"), SENS, profile.sens, v => v, v => { profile.sens = v; saveProfile(); });
+  chips($("#sk-climate"), CLIMATES, profile.climate, v => v, v => { profile.climate = v; saveProfile(); }, true);
+  if (document.activeElement !== $("#sk-notes")) $("#sk-notes").value = profile.notes || "";
+  $("#analyze").disabled = false;
+  $("#analyzeLabel").textContent = "Get my skin tips";
+  renderResult(skin.analysis);
+}
+let profTimer;
+function saveProfile() {
+  if (!db || !canWrite) return;
+  clearTimeout(profTimer);
+  profTimer = setTimeout(() => { const data = {profile: JSON.parse(JSON.stringify(profile))}; if (skin.analysis) data.analysis = skin.analysis; writeDoc("settings/skin", () => db.doc("settings/skin").set(data)); }, 600);
+}
+$("#sk-notes").addEventListener("input", e => { profile.notes = e.target.value; saveProfile(); });
+
+// What to look for, per concern
+const CONCERN_RECS = {
+  "Acne / breakouts": {productType: "Acne serum or spot gel", when: "PM", ingredients: ["salicylic acid (BHA)", "niacinamide", "azelaic acid"], why: "Clears clogged pores and calms active breakouts."},
+  "Blackheads": {productType: "BHA exfoliant", when: "PM", ingredients: ["salicylic acid", "clay mask"], why: "Dissolves the oil plugs inside pores. 2–3 nights a week is enough."},
+  "Dark spots": {productType: "Brightening serum", when: "AM & PM", ingredients: ["vitamin C (morning)", "niacinamide", "alpha arbutin", "tranexamic acid"], why: "Fades marks over 6–8 weeks. Sunscreen stops them coming back."},
+  "Redness": {productType: "Calming serum or cream", when: "AM & PM", ingredients: ["centella (cica)", "panthenol (B5)", "allantoin"], why: "Soothes irritation and helps repair the skin barrier."},
+  "Dryness / flaking": {productType: "Barrier-repair moisturizer", when: "AM & PM", ingredients: ["ceramides", "hyaluronic acid", "squalane"], why: "Pulls in water and locks it in so flakes settle."},
+  "Oiliness": {productType: "Light gel moisturizer", when: "AM & PM", ingredients: ["niacinamide", "zinc", "green tea"], why: "Hydrates without grease and helps balance oil."},
+  "Large pores": {productType: "Pore-refining serum", when: "PM", ingredients: ["niacinamide", "BHA", "retinol"], why: "Keeps pores clear so they look smaller."},
+  "Dull skin": {productType: "Gentle exfoliant + vitamin C", when: "AM & PM", ingredients: ["lactic or glycolic acid (AHA)", "vitamin C"], why: "Removes dead cells and brings back glow."},
+  "Uneven texture": {productType: "AHA exfoliant or retinol", when: "PM", ingredients: ["glycolic acid", "lactic acid", "retinol"], why: "Smooths bumps and rough patches over a few weeks."},
+  "Fine lines": {productType: "Retinol + peptide serum", when: "PM", ingredients: ["retinol", "peptides", "PDRN"], why: "Boosts collagen. Start 2 nights a week, then build up."},
+  "Dark circles": {productType: "Eye cream", when: "AM & PM", ingredients: ["caffeine", "vitamin K", "peptides"], why: "Brightens and de-puffs the under-eye area."},
+};
+const CLEANSER_BY_TYPE = {
+  "Oily": {productType: "Gel or foam cleanser", ingredients: ["salicylic acid", "tea tree"], why: "Removes excess oil without stripping."},
+  "Dry": {productType: "Cream or oil cleanser", ingredients: ["glycerin", "ceramides"], why: "Cleans while keeping moisture in."},
+  "Combination": {productType: "Gentle low-pH gel cleanser", ingredients: ["centella", "green tea"], why: "Balances an oily T-zone and drier cheeks."},
+  "Normal": {productType: "Gentle cleanser", ingredients: ["glycerin", "centella"], why: "Keeps your skin barrier happy."},
+};
+// what a product name suggests it does
+const KEYWORDS = [
+  [/salicylic|bha|acne|spot|clear|tea ?tree|noscarna|acnon|aclean|fudicin/i, ["Acne / breakouts", "Blackheads"]],
+  [/vitamin ?c|vita[- ]?c|bright|dark ?spot|white|glow|arbutin|tone up/i, ["Dark spots", "Dull skin"]],
+  [/cica|centella|panthen|b5|calm|sooth|aloe|propolis/i, ["Redness"]],
+  [/hyaluron|ceramide|moist|cream|balm|baume|lotion|jelly/i, ["Dryness / flaking"]],
+  [/niacinamide/i, ["Oiliness", "Large pores", "Dark spots"]],
+  [/retinol|pdrn|peptide|collagen|reedle|4gf|gold/i, ["Fine lines", "Uneven texture"]],
+  [/aha|glycolic|peeling|exfoliat|lactic/i, ["Dull skin", "Uneven texture"]],
+  [/pore|charcoal|clay/i, ["Large pores", "Blackheads"]],
+];
+const STRONG = /retinol|aha|bha|glycolic|salicylic|peeling|exfoliat/i;
+const FACE_TYPES = ["Cleanser","Toner","Mist","Exfoliant","Booster","Serum","Spot gel","Eye cream","Moisturizer","Sunscreen","Mask","Other"];
+
+function localAdvice() {
+  const recs = [];
+  if (profile.type && CLEANSER_BY_TYPE[profile.type]) recs.push({...CLEANSER_BY_TYPE[profile.type], when: "AM & PM"});
+  profile.concerns.forEach(c => { if (CONCERN_RECS[c]) recs.push(CONCERN_RECS[c]); });
+  recs.push({productType: "Sunscreen SPF 30+", when: "AM", ingredients: ["broad spectrum", "PA+++"], why: "The step that protects everything else. Reapply every 2–3 hours outdoors."});
+
+  const sensitive = profile.sens === "Often stings or turns red";
+  const usable = items.filter(p => ["use","new"].includes(statusOf(p).key) && FACE_TYPES.includes(p.type || "Other"));
+  const review = [];
+  usable.forEach(p => {
+    const hits = new Set(); KEYWORDS.forEach(([re, cs]) => { if (re.test(p.name)) cs.forEach(c => hits.add(c)); });
+    const match = profile.concerns.filter(c => hits.has(c));
+    if (sensitive && STRONG.test(p.name)) review.push({product: p.name, verdict: "Use with care", note: "Strong active for reactive skin. Use 2–3 nights a week and patch-test first."});
+    else if (match.length) review.push({product: p.name, verdict: "Keep", note: "Good match for your " + match.map(m => m.toLowerCase()).join(" and ") + "."});
+  });
+
+  const tips = [];
+  ["am","pm"].forEach(k => {
+    const names = routine[k].map(st => stepInfo(st));
+    const orders = names.map(n => ORDER[n.type] || 99);
+    if (orders.some((o, i) => i && o < orders[i - 1])) tips.push(`Your ${k === "am" ? "morning" : "night"} steps are out of the usual order. Open Routine → Edit steps → Sort in usual order.`);
+  });
+  const pmNames = routine.pm.map(st => stepInfo(st).name).join(" | ");
+  if (/retinol/i.test(pmNames) && /aha|bha|glycolic|salicylic|peeling|exfoliat/i.test(pmNames)) tips.push("You have retinol and an acid exfoliant on the same night. Alternate them on different nights to avoid irritation.");
+  if (/retinol/i.test(pmNames) || items.some(p => statusOf(p).key === "use" && /retinol/i.test(p.name))) tips.push("Retinol makes skin sun-sensitive. Never skip sunscreen the next morning.");
+  if (!routine.am.some(st => stepInfo(st).type === "Sunscreen")) tips.push("Add a sunscreen as the last step of your morning routine.");
+  if (profile.climate.includes("Hot & humid")) tips.push("In humid weather, layer light textures: gel moisturizer and a watery sunscreen.");
+  if (profile.climate.includes("Air-conditioned indoors")) tips.push("Air-con dries skin out. A hydrating toner or mist during the day helps.");
+  if (profile.climate.includes("Dry / cold")) tips.push("In dry or cold air, switch to a richer cream at night.");
+  if (profile.climate.includes("Lots of sun")) tips.push("With lots of sun, reapply sunscreen every 2–3 hours. A cushion or stick makes it easy.");
+  tips.push("Introduce one new product at a time and wait 1–2 weeks before adding the next.");
+
+  const avoid = [];
+  if (sensitive) avoid.push("fragrance and essential oils", "alcohol denat. high in the ingredient list", "using several strong actives on the same night");
+  if (profile.type === "Dry") avoid.push("foaming cleansers with SLS");
+  if (profile.type === "Oily" || profile.concerns.includes("Acne / breakouts")) avoid.push("heavy oils like coconut oil on the face");
+  avoid.push("over-exfoliating (more than 3 times a week)");
+
+  const parts = [];
+  if (profile.type && profile.type !== "Not sure") parts.push(`${profile.type.toLowerCase()} skin`);
+  if (profile.concerns.length) parts.push(`focus on ${profile.concerns.slice(0, 3).map(c => c.toLowerCase()).join(", ")}`);
+  const summary = (parts.length ? `For ${parts.join(" with a ")}, ` : "To start, ") +
+    `keep it simple: a gentle cleanser, the targeted serum below, a moisturizer, and sunscreen every morning.` +
+    (sensitive ? " Your skin reacts easily, so go slow with strong actives." : "");
+  const seeDermatologist = (profile.concerns.includes("Acne / breakouts") && sensitive) ? "If breakouts are painful, deep or leave scars, a dermatologist can help." : null;
+  return {summary, photoNotes: null, recommendations: recs.slice(0, 6), shelfReview: review.slice(0, 12), routineTips: tips.slice(0, 6), avoid: avoid.slice(0, 4), seeDermatologist, date: iso(today0()), withPhoto: false};
+}
+$("#analyze").onclick = () => {
+  if (!profile.type && !profile.concerns.length) { toast("Pick your skin type or a concern first"); return; }
+  const analysis = localAdvice();
+  skin.analysis = analysis;
+  if (db && canWrite) writeDoc("settings/skin", () => db.doc("settings/skin").set({profile: JSON.parse(JSON.stringify(profile)), analysis}));
+  renderResult(analysis);
+  $("#result").scrollIntoView({behavior: "smooth", block: "start"});
+};
+function renderResult(a) {
+  const res = $("#result");
+  if (!a) { res.hidden = true; return; }
+  res.hidden = false; res.textContent = "";
+  const head = el("div"); head.append(el("h2", null, "Your skin tips"), el("p", "note", `${fmt(parse(a.date))}${a.withPhoto ? " · with photo" : ""}`));
+  res.append(head, el("p", null, a.summary || ""));
+  if (a.photoNotes) res.append(el("div", "alert info", "From your photo: " + a.photoNotes));
+  if (Array.isArray(a.recommendations) && a.recommendations.length) {
+    const h = el("div", "sechead"); h.append(el("h3", null, "Best solutions for you"), el("span", "note", "Swipe →")); res.append(h);
+    const row = el("div", "recs");
+    a.recommendations.forEach((r, i) => {
+      const box = el("div", "rec " + REC_TINTS[i % REC_TINTS.length]);
+      const w = String(r.when || "");
+      box.append(el("span", "when", w === "AM" ? "Morning" : w === "PM" ? "Night" : "Morning & night"), el("b", null, r.productType || ""));
+      if (Array.isArray(r.ingredients) && r.ingredients.length) { const c = el("div", "chips"); c.style.gap = "4px"; r.ingredients.forEach(x => c.append(el("span", "tag", String(x)))); box.append(c); }
+      if (r.why) box.append(el("span", "why", r.why));
+      row.append(box);
+    });
+    res.append(row);
+  }
+  if (Array.isArray(a.shelfReview) && a.shelfReview.length) {
+    res.append(el("h3", null, "Your current products"));
+    const wrap = el("div");
+    a.shelfReview.forEach(r => {
+      const box = el("div", "review"); const v = String(r.verdict || "");
+      box.append(el("b", null, r.product || ""), el("span", "pill " + (v === "Keep" ? "s-use" : v === "Use with care" ? "s-soon" : "s-bad"), v));
+      if (r.note) box.append(el("span", "note", r.note)); wrap.append(box);
+    });
+    res.append(wrap);
+  }
+  const list = (title, arr) => { if (!Array.isArray(arr) || !arr.length) return; res.append(el("h3", null, title)); const ul = el("ul", "tips"); arr.forEach(t => ul.append(el("li", null, String(t)))); res.append(ul); };
+  list("Routine tips", a.routineTips);
+  list("Avoid", a.avoid);
+  if (a.seeDermatologist) res.append(el("div", "alert bad", a.seeDermatologist));
+  res.append(el("p", "disclaimer", "General cosmetic tips, not a medical diagnosis. Patch-test new products on your jawline for a few days first."));
+}
+
+// ================= PHOTOS =================
+function renderPhotos() {
+  $("#cmpBar").hidden = photos.length < 2;
+  $("#cmpBtn").textContent = compareMode ? "Cancel" : "Compare two photos";
+  $("#cmpHint").textContent = compareMode ? `Tap 2 photos (${compareSel.length}/2)` : "";
+  const g = $("#gallery"); g.textContent = "";
+  if (!assets && loaded && !photos.length) { g.append(el("div", "empty", "Photo uploads aren't available in this view.")); return; }
+  if (!photos.length) { g.append(el("div", "empty", loaded ? "Your photo diary is empty. Tap + Add photo to take your first one. Photos stay private to you." : "Loading your photos…")); return; }
+  const wrap = el("div"); wrap.style.display = "flex"; wrap.style.flexDirection = "column"; wrap.style.gap = "14px";
+  let month = "", grid;
+  photos.forEach(ph => {
+    const d = parse(ph.date);
+    const m = d.toLocaleDateString(undefined, {month: "long", year: "numeric"});
+    if (m !== month) { month = m; wrap.append(el("p", "month", m)); grid = el("div", "grid"); wrap.append(grid); }
+    const b = el("button", "thumb" + (compareSel.includes(ph.id) ? " sel" : "")); b.type = "button";
+    b.setAttribute("aria-label", `Photo from ${fmt(d)}${ph.note ? ", " + ph.note : ""}`);
+    const img = el("img"); img.src = blobURL(ph.assetId); img.alt = ""; img.loading = "lazy";
+    b.append(img, el("span", null, fmtShort(d) + (ph.when ? " · " + (ph.when === "Morning" ? "AM" : "PM") : "")));
+    b.onclick = () => {
+      if (compareMode) { const i = compareSel.indexOf(ph.id); i >= 0 ? compareSel.splice(i, 1) : compareSel.push(ph.id); compareSel.length === 2 ? showCompare() : renderPhotos(); }
+      else showPhoto(ph);
+    };
+    grid.append(b);
+  });
+  g.append(wrap);
+}
+$("#cmpBtn").onclick = () => { compareMode = !compareMode; compareSel = []; renderPhotos(); };
+function showCompare() {
+  const [a, b] = compareSel.map(id => photos.find(p => p.id === id)).sort((x, y) => x.date.localeCompare(y.date));
+  compareMode = false; compareSel = []; renderPhotos();
+  const v = $("#vInner"); v.textContent = "";
+  const days = Math.round((parse(b.date) - parse(a.date)) / DAY);
+  v.append(el("h2", null, "Before & after"), el("p", "note", `${days} day${days===1?"":"s"} apart`));
+  const c = el("div", "compare");
+  [a, b].forEach(p => { const f = el("figure"); const img = el("img"); img.src = blobURL(p.assetId); img.alt = "Face photo from " + fmt(parse(p.date)); f.append(img, el("figcaption", null, fmt(parse(p.date)))); if (p.note) f.append(el("p", "note", p.note)); c.append(f); });
+  const close = el("button", "btn big primary", "Close"); close.type = "button"; close.onclick = closeSheets;
+  v.append(c, close); openSheet("#vsheet");
+}
+function showPhoto(ph) {
+  const v = $("#vInner"); v.textContent = "";
+  v.append(el("h2", null, fmt(parse(ph.date)) + (ph.when ? " · " + ph.when : "")));
+  const img = el("img"); img.src = blobURL(ph.assetId); img.alt = "Face photo from " + fmt(parse(ph.date));
+  img.onerror = () => { img.replaceWith(el("div", "empty", "This photo couldn't load.")); };
+  v.append(img);
+  if (ph.note) v.append(el("p", null, ph.note));
+  const a = el("div", "actions");
+  const close = el("button", "btn primary", "Close"); close.type = "button"; close.onclick = closeSheets; a.append(close);
+  if (canWrite) {
+    const del = el("button", "btn danger", "Delete photo"); del.type = "button";
+    del.onclick = () => confirmRow(a, "Delete this photo for good?", async () => {
+      await db.collection("photos").doc(ph.id).delete();
+      if (assets) { try { await assets.delete(ph.assetId); } catch {} }
+      closeSheets(); toast("Photo deleted");
+    }, () => showPhoto(ph));
+    a.append(del);
+  }
+  v.append(a); openSheet("#vsheet");
+}
+async function shrink(file, max = 1600) {
+  try {
+    const bmp = await createImageBitmap(file, {imageOrientation: "from-image"});
+    const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * scale); cv.height = Math.round(bmp.height * scale);
+    cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
+    return await new Promise(r => cv.toBlob(b => r(b || file), "image/jpeg", 0.85));
+  } catch { return file; }
+}
+$("#photoInput").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  pendingPhoto = await shrink(f);
+  $("#pPreview").src = URL.createObjectURL(pendingPhoto);
+  $("#p-date").value = iso(today0()); $("#p-note").value = "";
+  photoWhen = new Date().getHours() < 15 ? "Morning" : "Night";
+  chips($("#p-when"), ["Morning","Night"], photoWhen, v => v, v => photoWhen = v);
+  $("#scrim").hidden = false; $("#psheet").hidden = false;
+});
+$("#pform").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!pendingPhoto || !assets) return;
+  const btn = $("#pSave"); btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    const type = ["image/jpeg","image/png","image/webp","image/gif"].includes(pendingPhoto.type) ? undefined : "image/jpeg";
+    const up = await assets.upload(pendingPhoto, type ? {type} : undefined);
+    await db.collection("photos").add({assetId: up.id, date: $("#p-date").value || iso(today0()), when: photoWhen, note: $("#p-note").value.trim(), added: new Date().toISOString()});
+    closeSheets(); toast("Photo saved");
+  } catch (err) {
+    const msg = {too_large: "That photo is too big. Try a smaller one.", unsupported_type: "That file type isn't supported. Use a JPEG or PNG photo.", quota_or_state: "Photo storage is full. Delete some old photos first."}[err && err.code];
+    if (msg) toast(msg); else handleWriteError(err);
+  } finally { btn.disabled = false; btn.textContent = "Save photo"; }
+});
+
+// ================= DATA (saved on this phone) =================
+// Products, routine, logs and settings live in localStorage; photos live in IndexedDB.
+// The small API below mirrors the one the Claude version used, so the rest of the app is unchanged.
+const STORE_KEY = "skincare-shelf-v1";
+const LocalDB = (() => {
+  let data; try { data = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { data = {}; }
+  const listeners = new Set(); let pending = false;
+  const clone = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+  function persist() { try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch { toast("Phone storage is full. Export a backup and delete old photos."); } }
+  function notify() { persist(); if (pending) return; pending = true; queueMicrotask(() => { pending = false; listeners.forEach(l => l()); }); }
+  const coll = name => (data[name] = data[name] || {});
+  const snapDoc = (id, d) => ({id, exists: d !== undefined, data: () => clone(d), metadata: {fromCache: false, hasPendingWrites: false}});
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  function docRef(name, id) {
+    return {
+      id,
+      async get() { return snapDoc(id, coll(name)[id]); },
+      async set(d) { coll(name)[id] = clone(d); notify(); },
+      async update(d) { if (!coll(name)[id]) throw {code: "missing"}; Object.assign(coll(name)[id], clone(d)); notify(); },
+      async delete() { delete coll(name)[id]; notify(); },
+      onSnapshot(next) { const fire = () => next(snapDoc(id, coll(name)[id])); listeners.add(fire); setTimeout(fire); return () => listeners.delete(fire); },
+    };
+  }
+  function query(name, order, lim) {
+    const q = {
+      orderBy(f, dir = "asc") { return query(name, {f, dir}, lim); },
+      limit(n) { return query(name, order, n); },
+      onSnapshot(next) {
+        const fire = () => {
+          let rows = Object.entries(coll(name));
+          if (order) rows.sort((a, b) => { const x = a[1][order.f] ?? "", y = b[1][order.f] ?? ""; return (x < y ? -1 : x > y ? 1 : 0) * (order.dir === "desc" ? -1 : 1); });
+          if (lim) rows = rows.slice(0, lim);
+          const docs = rows.map(([id, d]) => snapDoc(id, d));
+          next({docs, size: docs.length, empty: !docs.length, metadata: {fromCache: false}});
+        };
+        listeners.add(fire); setTimeout(fire); return () => listeners.delete(fire);
+      },
+      doc: id => docRef(name, id || newId()),
+      async add(d) { const id = newId(); coll(name)[id] = clone(d); notify(); return docRef(name, id); },
+    };
+    return q;
+  }
+  return {
+    collection: name => query(name),
+    doc(path) { const [c, id] = path.split("/"); return docRef(c, id); },
+    exportData: () => clone(data),
+    replaceAll(d) { data = clone(d) || {}; notify(); },
+  };
+})();
+
+const Photos = (() => {
+  const urls = new Map(); let dbp;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open("skincare-shelf-photos", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("blobs");
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }));
+  const run = async (mode, fn) => { const d = await open(); return new Promise((res, rej) => { const t = d.transaction("blobs", mode); const req = fn(t.objectStore("blobs")); t.oncomplete = () => res(req && req.result); t.onerror = () => rej(t.error); }); };
+  return {
+    async loadAll() {
+      try { const d = await open(); await new Promise(res => { const req = d.transaction("blobs").objectStore("blobs").openCursor(); req.onsuccess = () => { const c = req.result; if (c) { urls.set(c.key, URL.createObjectURL(c.value)); c.continue(); } else res(); }; req.onerror = () => res(); }); } catch {}
+    },
+    async put(id, blob) { await run("readwrite", st => st.put(blob, id)); const old = urls.get(id); if (old) URL.revokeObjectURL(old); urls.set(id, URL.createObjectURL(blob)); },
+    async upload(blob) { const id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); await this.put(id, blob); return {id, url: urls.get(id), sizeBytes: blob.size, contentType: blob.type}; },
+    async delete(id) { await run("readwrite", st => st.delete(id)); const u = urls.get(id); if (u) URL.revokeObjectURL(u); urls.delete(id); return {deleted: true}; },
+    async clear() { await run("readwrite", st => st.clear()); urls.forEach(u => URL.revokeObjectURL(u)); urls.clear(); },
+    async getBlob(id) { try { return await run("readonly", st => st.get(id)); } catch { return null; } },
+    ids: () => [...urls.keys()],
+    url: id => urls.get(id) || "",
+  };
+})();
+function blobURL(id) { return Photos.url(id); }
+
+// ---------- settings: name, backup, Google Sheet import ----------
+const NAME_KEY = "skincare-shelf-name";
+function loadName() { try { firstName = (localStorage.getItem(NAME_KEY) || "").trim(); } catch { firstName = ""; } }
+function openSettings() {
+  $("#set-name").value = firstName;
+  try { $("#set-sheet").value = localStorage.getItem("skincare-shelf-sheet") || ""; } catch {}
+  const n = items.length, ph = Photos.ids().length;
+  $("#set-stats").textContent = `On this phone: ${n} product${n === 1 ? "" : "s"}, ${ph} photo${ph === 1 ? "" : "s"}.`;
+  $("#set-sheetMsg").textContent = ""; $("#set-restoreRow").hidden = true;
+  openSheet("#ssheet");
+}
+$("#avatar").onclick = openSettings;
+$("#set-name").addEventListener("input", e => { firstName = e.target.value.trim(); try { localStorage.setItem(NAME_KEY, firstName); } catch {} renderHeader(); });
+
+const blobToDataURL = b => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(null); r.readAsDataURL(b); });
+const dataURLToBlob = async u => (await fetch(u)).blob();
+$("#set-export").onclick = async () => {
+  const btn = $("#set-export"); btn.disabled = true; btn.textContent = "Preparing…";
+  try {
+    const photosOut = {};
+    for (const id of Photos.ids()) { const b = await Photos.getBlob(id); if (b) photosOut[id] = await blobToDataURL(b); }
+    const backup = {app: "skincare-shelf", version: 1, exportedAt: new Date().toISOString(), name: firstName, data: LocalDB.exportData(), photos: photosOut};
+    const file = new File([JSON.stringify(backup)], `skincare-shelf-backup-${iso(today0())}.json`, {type: "application/json"});
+    if (navigator.canShare && navigator.canShare({files: [file]})) {
+      try { await navigator.share({files: [file], title: "Skincare Shelf backup"}); toast("Backup ready"); return; } catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast("Backup saved to your downloads");
+  } catch { toast("Couldn't make the backup. Try again."); }
+  finally { btn.disabled = false; btn.textContent = "Export backup"; }
+};
+let pendingRestore = null;
+$("#set-import").onclick = () => $("#restoreInput").click();
+$("#restoreInput").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  try {
+    const j = JSON.parse(await f.text());
+    if (!j || j.app !== "skincare-shelf" || !j.data) throw 0;
+    pendingRestore = j;
+    const n = Object.keys((j.data && j.data.products) || {}).length;
+    $("#set-restoreMsg").textContent = `This backup has ${n} products from ${fmt(new Date(j.exportedAt))}. Restoring replaces everything on this phone.`;
+    $("#set-restoreRow").hidden = false;
+  } catch { toast("That file isn't a Skincare Shelf backup."); }
+});
+$("#set-restoreNo").onclick = () => { pendingRestore = null; $("#set-restoreRow").hidden = true; };
+$("#set-restoreYes").onclick = async () => {
+  if (!pendingRestore) return;
+  const j = pendingRestore; pendingRestore = null; $("#set-restoreRow").hidden = true;
+  try {
+    await Photos.clear();
+    for (const [id, u] of Object.entries(j.photos || {})) { try { await Photos.put(id, await dataURLToBlob(u)); } catch {} }
+    LocalDB.replaceAll(j.data);
+    if (j.name) { firstName = j.name; try { localStorage.setItem(NAME_KEY, firstName); } catch {} }
+    closeSheets(); toast("Backup restored");
+  } catch { toast("Couldn't restore that backup."); }
+};
+
+// CSV parser that handles quoted fields
+function parseCSV(text) {
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ""));
+}
+const CAT_MAP = {"serum": "Serum", "ampoule": "Serum", "moisturizer": "Moisturizer", "cream": "Moisturizer", "facial care": "Cleanser", "wash": "Cleanser", "cleans": "Cleanser", "sunscreen": "Sunscreen", "toner": "Toner", "spray": "Mist", "mist": "Mist", "booster": "Booster", "spot": "Spot gel", "body": "Body care", "lip": "Lip care", "armpit": "Armpit care", "underarm": "Armpit care", "hair": "Hair care", "vitamin": "Vitamins", "shot": "Vitamins", "mask": "Mask", "eye": "Eye cream", "exfoli": "Exfoliant"};
+function mapCategory(cat) {
+  const c = (cat || "").toLowerCase();
+  for (const t of TYPES) if (c === t.toLowerCase()) return t;
+  for (const k of ["armpit", "underarm", "body", "lip", "hair", "vitamin", "spot", "spray", "mist", "booster", "sunscreen", "toner", "facial care", "wash", "cleans", "eye", "mask", "exfoli", "serum", "ampoule", "moisturizer", "cream", "shot"]) if (c.includes(k)) return CAT_MAP[k];
+  return "Other";
+}
+function sheetDate(s) {
+  s = (s || "").trim(); if (!s || s === "-") return "";
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if (m) return `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+  m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+  if (m) { let a = +m[1], b = +m[2], y = +m[3]; if (y < 100) y += 2000; let mo = a, d = b; if (a > 12) { mo = b; d = a; } return `${y}-${pad(mo)}-${pad(d)}`; }
+  const t = new Date(s); return isNaN(t) ? "" : iso(t);
+}
+$("#set-sheetGo").onclick = async () => {
+  const link = $("#set-sheet").value.trim(), msg = $("#set-sheetMsg");
+  const m = link.match(/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (!m) { msg.textContent = "Paste the full link of your Google Sheet (it contains /spreadsheets/d/…)."; return; }
+  const gid = (link.match(/[#&?]gid=(\d+)/) || [])[1];
+  const btn = $("#set-sheetGo"); btn.disabled = true; btn.textContent = "Importing…"; msg.textContent = "";
+  try {
+    // export keeps every cell as typed (gviz drops text in date columns); fall back to gviz if needed
+    let text = null;
+    for (const u of [`https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv${gid ? "&gid=" + gid : ""}`, `https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv${gid ? "&gid=" + gid : ""}`]) {
+      try { const r = await fetch(u); if (r.ok) { const t = await r.text(); if (!/^\s*<(!doctype|html)/i.test(t)) { text = t; break; } } } catch {}
+    }
+    if (text === null) throw new Error("http");
+    const rows = parseCSV(text);
+    if (rows.length < 2) throw new Error("empty");
+    const head = rows[0].map(h => h.toLowerCase());
+    const findCol = re => head.findIndex(h => re.test(h));
+    const iName = findCol(/name|product/), iCat = findCol(/categ|type/), iStatus = findCol(/status/), iExp = findCol(/expir|exp\b|best before/), iNote = findCol(/note/);
+    if (iName < 0) throw new Error("noname");
+    try { localStorage.setItem("skincare-shelf-sheet", link); } catch {}
+    const today = iso(today0());
+    const byName = new Map(items.map(p => [p.name.trim().toLowerCase(), p]));
+    let added = 0, updated = 0;
+    for (const r2 of rows.slice(1)) {
+      const name = (r2[iName] || "").trim(); if (!name) continue;
+      const status = (iStatus >= 0 ? r2[iStatus] : "").trim().toLowerCase();
+      const d = {name, type: mapCategory(iCat >= 0 ? r2[iCat] : ""), category: (iCat >= 0 ? r2[iCat] : "").trim(), expiry: sheetDate(iExp >= 0 ? r2[iExp] : ""), note: (iNote >= 0 ? r2[iNote] : "").trim(), source: "Google Sheet"};
+      const existing = byName.get(name.toLowerCase());
+      if (existing) {
+        const patch = {...d};
+        if (/done|finish|empty|used up/.test(status) && !existing.finished) { patch.finished = today; if (!existing.opened) patch.opened = today; }
+        if (/progress|in use|open/.test(status) && !existing.opened) patch.opened = today;
+        await col.doc(existing.id).update(patch); updated++;
+      } else {
+        const opened = /progress|in use|open|done|finish|empty|used up/.test(status) ? today : "";
+        const finished = /done|finish|empty|used up/.test(status) ? today : "";
+        await col.add({...d, opened, finished, pao: 0, photoId: "", added: today}); added++;
+      }
+    }
+    msg.textContent = `Done: ${added} added${updated ? `, ${updated} updated` : ""}.`;
+    toast(`Imported ${added + updated} products`);
+  } catch (e) {
+    msg.textContent = e && e.message === "noname" ? "Couldn't find a product name column. The first row should have headers like Name, Category, Status, Expired Date, Notes."
+      : "Couldn't read that sheet. In Google Sheets, tap Share → General access → Anyone with the link → Viewer, then try again.";
+  } finally { btn.disabled = false; btn.textContent = "Import"; }
+};
+
+// ---------- start ----------
+setView(location.hash.slice(1) || "shelf");
+(async () => {
+  loadName();
+  db = LocalDB; assets = Photos; canWrite = true;
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch {}
+  await Photos.loadAll();
+  col = db.collection("products");
+  col.onSnapshot(snap => { loaded = true; items = snap.docs.map(d => ({id: d.id, ...d.data()})); renderAll(); });
+  db.doc("settings/routine").onSnapshot(s => {
+    const d = s.exists ? s.data() : {};
+    routine = {am: d.am || [], pm: d.pm || []};
+    renderAll(); if (!$("#rsheet").hidden) renderEditor();
+  });
+  db.doc("settings/banner").onSnapshot(s => {
+    bannerCuts = (s.exists && Array.isArray(s.data().cuts)) ? s.data().cuts.slice(0, 3) : [];
+    if (view === "shelf") renderBanner(); if (!$("#bsheet").hidden) renderCutList();
+  });
+  db.doc("settings/skin").onSnapshot(s => {
+    skin = s.exists ? {...s.data()} : {};
+    const p = skin.profile || {};
+    profile = {type: p.type || "", concerns: (p.concerns || []).slice(), sens: p.sens || "", climate: (p.climate || []).slice(), notes: p.notes || ""};
+    renderAll();
+  });
+  db.collection("log").orderBy("date", "desc").limit(14).onSnapshot(snap => { logs = {}; snap.docs.forEach(d => logs[d.id] = d.data()); if (view === "routine" || view === "shelf") renderAll(); });
+  db.collection("photos").orderBy("date", "desc").onSnapshot(snap => { photos = snap.docs.map(d => ({id: d.id, ...d.data()})); renderAll(); });
+  setView(view);
+  if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>

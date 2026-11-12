@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fde6df"/>
+      <stop offset="0.55" stop-color="#f9c9c0"/>
+      <stop offset="1" stop-color="#e9dcfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- dropper bottle -->
+  <rect x="226" y="86" width="60" height="70" rx="20" fill="#2b2a2e"/>
+  <rect x="236" y="146" width="40" height="30" rx="6" fill="#4a474f"/>
+  <rect x="166" y="170" width="180" height="250" rx="54" fill="#ffffff"/>
+  <rect x="166" y="170" width="180" height="250" rx="54" fill="#f7988a" opacity=".18"/>
+  <rect x="200" y="250" width="112" height="86" rx="18" fill="#f7988a"/>
+  <rect x="222" y="276" width="68" height="10" rx="5" fill="#ffffff"/>
+  <rect x="222" y="298" width="44" height="10" rx="5" fill="#ffffff" opacity=".85"/>
+  <!-- sparkle -->
+  <path d="M388 140 l10 26 26 10 -26 10 -10 26 -10 -26 -26 -10 26 -10z" fill="#ffffff"/>
+  <path d="M120 330 l7 17 17 7 -17 7 -7 17 -7 -17 -17 -7 17 -7z" fill="#ffffff" opacity=".9"/>
+</svg>

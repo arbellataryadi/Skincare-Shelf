@@ -1,5 +1,5 @@
 // Offline support: keep the app and its fonts cached so it opens without internet.
-const VERSION = "skincare-shelf-v1";
+const VERSION = "skincare-shelf-v5";
 const APP_FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

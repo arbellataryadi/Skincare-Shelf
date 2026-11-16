@@ -11,10 +11,10 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Skincare">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,500;1,600&display=swap">
 <style>
 /* Layout: blush header band with greeting, then a white panel with rounded top corners holding the content; pastel product tiles; floating pill tab bar */
 :root {
@@ -39,8 +39,8 @@
   --shadow: 0 10px 28px rgba(150, 90, 80, .08);
   --shadow-lg: 0 18px 44px rgba(90, 50, 45, .16);
   --scrim: rgba(30, 25, 28, .38);
-  --font-body: "Gaegu", "Chalkboard SE", "Comic Sans MS", cursive;
-  --font-accent: "Gaegu", "Chalkboard SE", "Comic Sans MS", cursive;
+  --font-body: "Poppins", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-accent: "Playfair Display", Georgia, "Times New Roman", serif;
   --r-lg: 28px; --r-md: 22px; --r-sm: 16px;
 }
 @media (prefers-color-scheme: dark) {
@@ -65,14 +65,17 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
-  --accent: #ef8574; /* each menu gets its own pastel: set per view below */
+/* full screen: the page background lives on <html> so it runs under the status bar and into every corner */
+html:root:root { --accent: #ef8574; /* each menu gets its own pastel: set per view below (extra :root so it beats the theme blocks) */
   --accent-soft: color-mix(in srgb, var(--accent) 16%, var(--panel));
   --accent-mid: color-mix(in srgb, var(--accent) 34%, var(--panel)); }
-body[data-view="shelf"]   { --accent: #ef8574; }  /* peach-coral */
-body[data-view="routine"] { --accent: #6d97e3; }  /* powder blue */
-body[data-view="skin"]    { --accent: #9a86e3; }  /* lilac */
-body[data-view="photos"]  { --accent: #45b29b; }  /* mint */
+body { margin: 0; background: transparent; color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  padding-top: env(safe-area-inset-top, 0px); }
+img { max-width: 100%; }
+html:root:root[data-view="shelf"] { --accent: #ef8574; }  /* peach-coral */
+html:root:root[data-view="routine"] { --accent: #6d97e3; }  /* powder blue */
+html:root:root[data-view="journey"] { --accent: #9a86e3; }  /* lilac */
+html:root:root[data-view="profile"] { --accent: #45b29b; }  /* mint */
 .wrap { max-width: 520px; margin: 0 auto; padding-top: 26px; }
 .wrap > header, .headx { padding-left: max(22px, env(safe-area-inset-left, 0px)); padding-right: max(22px, env(safe-area-inset-right, 0px)); }
 .headx:empty { display: none; }
@@ -227,7 +230,7 @@ section.view { display: flex; flex-direction: column; gap: 18px; }
 .sheet::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 14px; }
 .sheet form, .sheet .inner { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 label, .lbl { font-size: 14px; font-weight: 500; color: var(--muted); display: block; margin-bottom: 6px; }
-input[type="text"], input[type="date"], select, textarea { width: 100%; font: 16px var(--font-body); padding: 12px 14px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); }
+input[type="text"], input[type="date"], input[type="time"], select, textarea { width: 100%; font: 16px var(--font-body); padding: 12px 14px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); }
 textarea { min-height: 72px; resize: vertical; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { border: 0; background: var(--surface-2); color: var(--fg); border-radius: 999px; padding: 8px 14px; font: 400 15px var(--font-body); cursor: pointer; }
@@ -327,54 +330,60 @@ ul.tips { margin: 0; padding-left: 18px; display: flex; flex-direction: column; 
 @media (prefers-reduced-motion: no-preference) { .sheet { animation: up .25s cubic-bezier(.2,.8,.2,1); } @keyframes up { from { transform: translateY(40px); opacity: .5; } } }
 @media (prefers-reduced-motion: reduce) { .thinking::after { animation: none; } }
 
-/* Gaegu sizing: bigger, bolder, tighter so text reads full and clear (kept last so it wins the cascade) */
-body { letter-spacing: -0.045em; word-spacing: 0.05em; }
-h1 { font-size: 44px; } h2 { font-size: 32px; } h3 { font-size: 24px; }
-h1, h2, h3, .banner .txt b, .hero h2, .day b { font-weight: 700; letter-spacing: -0.055em; }
+/* Typography, after the references: Poppins for the interface (light greeting + semibold name, medium labels),
+   Playfair Display italic only for the editorial headline and letter placeholders. Kept last so it wins the cascade. */
+body { font-size: 15px; letter-spacing: 0; word-spacing: normal; }
+h1, h2, h3, .day b { font-family: var(--font-body); letter-spacing: -0.02em; }
+h1 { font-size: 30px; font-weight: 300; line-height: 1.2; } h1 b { font-weight: 600; }
+h2 { font-size: 20px; font-weight: 600; line-height: 1.25; }
+h3 { font-size: 16px; font-weight: 600; }
 button, input, select, textarea { letter-spacing: inherit; }
-.banner .txt small, .hero .eyebrow, .day span, .rec .when, label, .lbl { letter-spacing: -0.02em; }
-.sub { font-size: 17px; } .note, .hint, .disclaimer { font-size: 15px; }
-.pcard .nm { font-size: 21px; font-weight: 700; line-height: 1.12; }
-.pcard .mt { font-size: 16px; margin-top: -2px; }
-.step .what b { font-size: 21px; font-weight: 700; line-height: 1.12; }
-.step .what small { font-size: 15px; font-weight: 700; color: var(--muted); }
-.step .what .warn { font-size: 16px; font-weight: 700; }
-.rsum .mid b { font-size: 20px; font-weight: 700; } .rsum .pct { font-size: 19px; font-weight: 700; }
-.pill { font-size: 15px; font-weight: 700; }
-.tab, .seg button { font-size: 19px; font-weight: 700; }
-.btn { font-size: 18px; font-weight: 700; } .btn.big, .formbtns .btn { font-size: 19px; }
-.fab { font-size: 19px; font-weight: 700; }
-.chip { font-size: 17px; font-weight: 700; }
-.alert { font-size: 17px; font-weight: 700; }
-.scanpill .t { font-size: 19px; font-weight: 700; }
-.banner .txt b { font-size: 36px; font-weight: 700; } .banner .txt small { font-size: 17px; font-weight: 700; }
-.hero h2 { font-size: 34px; font-weight: 700; }
-.day b { font-size: 26px; font-weight: 700; } .day span { font-size: 14px; font-weight: 700; }
-.ring span { font-size: 17px; font-weight: 700; }
-.fact span { font-size: 14px; } .fact b { font-size: 19px; font-weight: 700; }
-.rec b, .review b { font-size: 19px; font-weight: 700; } .rec .why { font-size: 16px; } .tag { font-size: 15px; font-weight: 700; }
-label, .lbl { font-size: 16px; font-weight: 700; }
-.month { font-size: 19px; font-weight: 700; } .thumb span { font-size: 15px; font-weight: 700; }
-input[type="text"], input[type="date"], select, textarea { font-size: 18px; }
-.pcard .img .letter, .dimg .letter, .pthumb { font-weight: 700; }
-.pcard .img .letter, .dimg .letter { opacity: .45; }
+.sub { font-size: 13px; font-weight: 400; } .note, .hint, .disclaimer { font-size: 12px; }
+.pcard .nm { font-size: 14px; font-weight: 500; line-height: 1.3; }
+.pcard .mt { font-size: 12px; margin-top: -4px; }
+.step .what b { font-size: 14px; font-weight: 500; line-height: 1.3; }
+.step .what small { font-size: 11px; font-weight: 400; color: var(--muted); }
+.step .what .warn { font-size: 12px; font-weight: 500; }
+.rsum .mid b { font-size: 14px; font-weight: 500; } .rsum .pct { font-size: 13px; font-weight: 600; }
+.pill { font-size: 11px; font-weight: 600; }
+.tab, .seg button { font-size: 13px; font-weight: 500; }
+.btn { font-size: 13px; font-weight: 500; } .btn.big, .formbtns .btn { font-size: 15px; font-weight: 500; }
+.fab { font-size: 14px; font-weight: 600; }
+.chip { font-size: 13px; font-weight: 400; }
+.alert { font-size: 13px; font-weight: 500; }
+.scanpill .t { font-size: 14px; font-weight: 500; }
+.hero h2 { font-family: var(--font-accent); font-style: italic; font-size: 28px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.15; }
+.hero .eyebrow { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.banner .txt b { font-family: var(--font-accent); font-style: italic; font-size: 28px; font-weight: 500; letter-spacing: -0.01em; }
+.banner .txt small { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.day b { font-size: 20px; font-weight: 500; } .day span { font-size: 11px; font-weight: 400; letter-spacing: .02em; }
+.ring span { font-size: 13px; font-weight: 600; }
+.fact span { font-size: 11px; } .fact b { font-size: 14px; font-weight: 500; }
+.rec b, .review b { font-size: 14px; font-weight: 600; } .rec .why { font-size: 12px; } .tag { font-size: 11px; font-weight: 500; }
+.rec .when { font-size: 11px; letter-spacing: .06em; }
+label, .lbl { font-size: 12px; font-weight: 500; letter-spacing: 0; }
+.month { font-size: 13px; font-weight: 600; } .thumb span { font-size: 11px; font-weight: 500; }
+input[type="text"], input[type="date"], select, textarea { font-size: 16px; } /* 16px stops iPhone zooming into fields */
+.pcard .img .letter, .dimg .letter, .pthumb { font-family: var(--font-accent); font-style: italic; font-weight: 500; }
+.pcard .img .letter, .dimg .letter { opacity: .35; }
+.avatar { font-family: var(--font-body); font-weight: 600; }
 
 /* ---------- Backgrounds per page ----------
    Ombre (colour at the top fading to white): Shelf + Routine — everyday lists, need a calm white reading area.
    Full colour wash: Skin check + Photos — the "special" moments (AI analysis, your face), so the whole page is tinted. */
 html { min-height: 100%; background: var(--bg); }
 body { min-height: 100vh; }
-body[data-view="shelf"]   { --accent2: #f4b183; }
-body[data-view="routine"] { --accent2: #63c3b0; }
-body[data-view="skin"]    { --accent2: #ef8fb4; --accent3: #7da8f2; }
-body[data-view="photos"]  { --accent2: #f2b07e; --accent3: #8fb6f2; }
-body[data-view="shelf"], body[data-view="routine"] {
+html[data-view="shelf"]   { --accent2: #f4b183; }
+html[data-view="routine"] { --accent2: #63c3b0; }
+html[data-view="journey"] { --accent2: #ef8fb4; --accent3: #7da8f2; }
+html[data-view="profile"] { --accent2: #f2b07e; }
+html[data-view="shelf"], html[data-view="routine"], html[data-view="profile"] {
   background:
     radial-gradient(120% 340px at 85% 0, color-mix(in srgb, var(--accent2) 34%, transparent), transparent 70%),
     linear-gradient(180deg, color-mix(in srgb, var(--accent) 46%, var(--bg)) 0, color-mix(in srgb, var(--accent2) 24%, var(--bg)) 320px, var(--bg) 620px) no-repeat,
     var(--bg);
 }
-body[data-view="skin"], body[data-view="photos"] {
+html[data-view="journey"] {
   background:
     radial-gradient(60% 40% at 10% 8%, color-mix(in srgb, var(--accent2) 38%, transparent), transparent 70%),
     radial-gradient(55% 45% at 95% 40%, color-mix(in srgb, var(--accent) 42%, transparent), transparent 70%),
@@ -385,8 +394,8 @@ body[data-view="skin"], body[data-view="photos"] {
 .panel { background: transparent; }
 
 /* frosted glass surfaces */
-body { --glass: color-mix(in srgb, var(--panel) 62%, transparent); --glass-line: color-mix(in srgb, var(--panel) 85%, transparent); }
-body[data-view="shelf"], body[data-view="routine"] { --glass: color-mix(in srgb, var(--panel) 72%, transparent); }
+html { --glass: color-mix(in srgb, var(--panel) 62%, transparent); --glass-line: color-mix(in srgb, var(--panel) 85%, transparent); }
+html[data-view="shelf"], html[data-view="routine"], html[data-view="profile"] { --glass: color-mix(in srgb, var(--panel) 72%, transparent); }
 .panel .card, .panel .empty, .panel .tab, .day, .panel .seg, .panel .rsum, .scanpill, .tipbox, .panel .step .pthumb, .avatar {
   background-color: var(--glass); border: 1px solid var(--glass-line);
   -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%);
@@ -398,8 +407,21 @@ body[data-view="shelf"], body[data-view="routine"] { --glass: color-mix(in srgb,
 .panel .card .chip[aria-pressed="true"] { background: var(--accent); }
 .nav .in { background: color-mix(in srgb, var(--panel) 78%, transparent); -webkit-backdrop-filter: blur(20px) saturate(150%); backdrop-filter: blur(20px) saturate(150%); border-color: var(--glass-line); }
 .step { box-shadow: 0 6px 18px rgba(120, 80, 90, .06); }
-body[data-view="skin"] .hero, body[data-view="photos"] .tipbox { background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+html[data-view="journey"] .hero, html[data-view="journey"] .tipbox { background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
 .thumb { border-color: var(--glass-line); }
+.nudge { border: 0; width: 100%; text-align: left; font: inherit; cursor: pointer; color: var(--fg); background: color-mix(in srgb, var(--accent) 22%, var(--panel)); }
+/* bottom menu with labels: Home, Calendar, Journey, Profile */
+.nav .in { max-width: 380px; padding: 6px; gap: 4px; }
+.nav button { flex: 1; width: auto; height: auto; border-radius: 22px; padding: 8px 4px 7px; display: flex; flex-direction: column; align-items: center; gap: 2px; font: 500 11px var(--font-body); letter-spacing: 0; }
+.nav button svg { width: 22px; height: 22px; }
+.nav button[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+/* profile page */
+.profilecard { align-items: center; text-align: center; }
+.bigavatar { width: 104px; height: 104px; border-radius: 50%; overflow: hidden; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font: 600 38px var(--font-body); border: 4px solid var(--panel); box-shadow: var(--shadow); }
+.bigavatar img { width: 100%; height: 100%; object-fit: cover; }
+.bigavatar svg { width: 44px; height: 44px; }
+html[data-view="journey"] .hero .btn.primary { background: var(--ink); color: var(--ink-fg); }
+html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, var(--surface-2) 88%, transparent); }
 </style>
 </head>
 <body>
@@ -417,7 +439,7 @@ body[data-view="skin"] .hero, body[data-view="photos"] .tipbox { background: var
   <div class="panel">
   <!-- SHELF / HOME -->
   <section class="view" id="v-shelf">
-    <div class="bannerwrap">
+    <div class="bannerwrap" hidden>
       <button type="button" class="banner" id="banner" aria-label="Find the right care for your skin: open skin check">
         <span class="art" id="bannerArt"></span>
         <span class="txt"><small>Find the right</small><b>Care for your Skin</b></span>
@@ -451,12 +473,23 @@ body[data-view="skin"] .hero, body[data-view="photos"] .tipbox { background: var
     <button type="button" class="btn big" id="editRoutine">Edit morning steps</button>
   </section>
 
-  <!-- SKIN -->
-  <section class="view" id="v-skin" hidden>
+  <!-- MY SKIN JOURNEY: photo diary + skin tips -->
+  <section class="view" id="v-journey" hidden>
     <div class="hero">
-      <div><p class="eyebrow">Skin tips</p><h2>Find the right care for your skin</h2></div>
+      <div>
+        <p class="eyebrow">My skin journey</p><h2>See how your skin changes</h2>
+        <div class="actions" style="margin-top:12px"><button type="button" class="btn primary" id="heroAddPhoto">+ Add today's photo</button></div>
+      </div>
       <div class="face" id="heroFace"></div>
     </div>
+
+    <div class="sechead"><h2>Photo diary</h2><span class="note" id="photoCount"></span></div>
+    <div class="tipbox">For fair comparisons, take each photo in the same spot and light, no makeup, face straight to the camera.</div>
+    <div class="actions" id="cmpBar"><button type="button" class="btn" id="cmpBtn">Compare two photos</button><span class="note" id="cmpHint"></span></div>
+    <div id="gallery"><div class="empty">Loading your photos…</div></div>
+
+    <div class="sechead" id="tipsHead" style="margin-top:10px"><h2>Skin tips</h2></div>
+    <p class="note" style="margin-top:-10px">Tell us about your skin and get matched care.</p>
     <div class="card">
       <div><span class="lbl">Skin type</span><div class="chips" id="sk-type"></div></div>
       <div><span class="lbl">What bothers you (pick any)</span><div class="chips" id="sk-concerns"></div></div>
@@ -472,11 +505,62 @@ body[data-view="skin"] .hero, body[data-view="photos"] .tipbox { background: var
     <div class="card" id="result" hidden></div>
   </section>
 
-  <!-- PHOTOS -->
-  <section class="view" id="v-photos" hidden>
-    <div class="tipbox">For fair comparisons, take each photo in the same spot and light, no makeup, face straight to the camera.</div>
-    <div class="actions" id="cmpBar"><button type="button" class="btn" id="cmpBtn">Compare two photos</button><span class="note" id="cmpHint"></span></div>
-    <div id="gallery"><div class="empty">Loading your photos…</div></div>
+  <!-- PROFILE: photo, name, reminders, import, backup, about -->
+  <section class="view" id="v-profile" hidden>
+    <div class="card profilecard">
+      <div class="bigavatar" id="profAvatar"></div>
+      <div class="actions" style="justify-content:center">
+        <button type="button" class="btn primary" id="profPhoto">Choose profile photo</button>
+        <button type="button" class="btn" id="profPhotoRemove" hidden>Remove</button>
+      </div>
+      <div style="width:100%;text-align:left"><label for="set-name">Your name</label><input type="text" id="set-name" placeholder="Shown in the greeting" autocomplete="given-name"></div>
+      <p class="note" id="set-stats"></p>
+    </div>
+
+    <div class="card">
+      <h3>Reminders</h3>
+      <p class="note">Your phone's Calendar sends the alerts, so they arrive even when the app is closed.</p>
+      <div class="row2">
+        <div><label for="rem-am">Morning routine</label><input type="time" id="rem-am" value="07:00"></div>
+        <div><label for="rem-pm">Night routine</label><input type="time" id="rem-pm" value="21:00"></div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="rem-exp" checked> Remind me 7 days before a product I'm using expires</label>
+      <button type="button" class="btn primary" id="rem-add">Add reminders to my Calendar</button>
+      <p class="note" id="rem-msg" aria-live="polite"></p>
+    </div>
+
+    <div class="card">
+      <h3>Import from Google Sheet</h3>
+      <p class="note">Paste your sheet link. Columns like Name, Category, Status, Expired Date and Notes are picked up. Products with the same name are updated, not duplicated.</p>
+      <input type="text" id="set-sheet" placeholder="https://docs.google.com/spreadsheets/d/…" inputmode="url" autocomplete="off">
+      <button type="button" class="btn primary" id="set-sheetGo">Import</button>
+      <p class="note" id="set-sheetMsg" aria-live="polite"></p>
+    </div>
+
+    <div class="card">
+      <h3>Backup</h3>
+      <p class="note">Everything is saved only on this phone. Export a backup now and then, and before you clear browser data or switch phones.</p>
+      <div class="actions"><button type="button" class="btn primary" id="set-export">Export backup</button><button type="button" class="btn" id="set-import">Restore backup</button></div>
+      <div id="set-restoreRow" hidden class="alert bad" style="display:flex;flex-direction:column;gap:10px">
+        <span id="set-restoreMsg"></span>
+        <div class="actions"><button type="button" class="btn danger" id="set-restoreYes">Replace with backup</button><button type="button" class="btn" id="set-restoreNo">Cancel</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>About this app</h3>
+      <p class="note" id="appVersion"></p>
+      <div><span class="lbl">What's new</span>
+        <ul class="tips">
+          <li>My Skin Journey: your photo diary and skin tips on one page.</li>
+          <li>Profile: your photo, name, reminders, import and backup in one place.</li>
+          <li>Calendar reminders for your routine and for products about to expire.</li>
+          <li>New look: Poppins and Playfair fonts, full-screen colours.</li>
+        </ul>
+      </div>
+      <div class="actions"><button type="button" class="btn" id="checkUpdate">Check for updates</button><span class="note" id="updateMsg" aria-live="polite"></span></div>
+      <p class="note">Your products, routine and photos are saved only on this phone. Nothing is uploaded.</p>
+    </div>
   </section>
   </div>
 </div>
@@ -488,10 +572,10 @@ body[data-view="skin"] .hero, body[data-view="photos"] .tipbox { background: var
 <input type="file" id="restoreInput" accept="application/json,.json" hidden>
 
 <nav class="nav" aria-label="Sections"><div class="in">
-  <button type="button" data-view="shelf" aria-label="My shelf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg></button>
-  <button type="button" data-view="routine" aria-label="Routine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 14.5l2 2 4-4"/></svg></button>
-  <button type="button" data-view="skin" aria-label="Skin check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10h.01M15 10h.01M9.5 15c1.4 1 3.6 1 5 0"/></svg></button>
-  <button type="button" data-view="photos" aria-label="Photo diary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></button>
+  <button type="button" data-view="shelf" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
+  <button type="button" data-view="routine" aria-label="Calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M9 14.5l2 2 4-4"/></svg><span>Calendar</span></button>
+  <button type="button" data-view="journey" aria-label="My Skin Journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4.4 0 7 3.4 7 8 0 5-3.2 10-7 10s-7-5-7-10c0-4.6 2.6-8 7-8z"/><path d="M9.5 11h.01M14.5 11h.01M10 15.5c1.2.8 2.8.8 4 0"/><path d="M19.5 2.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor"/></svg><span>Journey</span></button>
+  <button type="button" data-view="profile" aria-label="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c1.2-3.6 4.1-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/></svg><span>Profile</span></button>
 </div></nav>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -566,31 +650,6 @@ body[data-view="skin"] .hero, body[data-view="photos"] .tipbox { background: var
   </div>
 </div>
 
-<!-- Settings -->
-<div class="sheet" id="ssheet" hidden role="dialog" aria-modal="true" aria-labelledby="ssheetTitle">
-  <div class="inner">
-    <h2 id="ssheetTitle">Settings</h2>
-    <div><label for="set-name">Your name</label><input type="text" id="set-name" placeholder="Shown in the greeting" autocomplete="given-name"></div>
-    <div class="card">
-      <h3>Import from Google Sheet</h3>
-      <p class="note">Paste your sheet link. Columns like Name, Category, Status, Expired Date and Notes are picked up. Products with the same name are updated, not duplicated.</p>
-      <input type="text" id="set-sheet" placeholder="https://docs.google.com/spreadsheets/d/…" inputmode="url" autocomplete="off">
-      <button type="button" class="btn primary" id="set-sheetGo">Import</button>
-      <p class="note" id="set-sheetMsg" aria-live="polite"></p>
-    </div>
-    <div class="card">
-      <h3>Backup</h3>
-      <p class="note">Everything is saved only on this phone. Export a backup now and then, and before you clear browser data or switch phones.</p>
-      <p class="note" id="set-stats"></p>
-      <div class="actions"><button type="button" class="btn primary" id="set-export">Export backup</button><button type="button" class="btn" id="set-import">Restore backup</button></div>
-      <div id="set-restoreRow" hidden class="alert bad" style="display:flex;flex-direction:column;gap:10px">
-        <span id="set-restoreMsg"></span>
-        <div class="actions"><button type="button" class="btn danger" id="set-restoreYes">Replace with backup</button><button type="button" class="btn" id="set-restoreNo">Cancel</button></div>
-      </div>
-    </div>
-    <button type="button" class="btn big" data-close>Done</button>
-  </div>
-</div>
 
 <!-- Viewer / product detail -->
 <div class="sheet" id="vsheet" hidden role="dialog" aria-modal="true" aria-label="Details">
@@ -674,31 +733,42 @@ function renderHeader() {
   const t = $("#viewTitle"), s = $("#viewSub"); t.textContent = "";
   if (view === "shelf") { t.append("Hello"); if (firstName) { t.append(" "); t.append(el("b", null, firstName)); } t.append(","); s.textContent = "Let's take care of your skin"; }
   if (view === "routine") { t.append(el("b", null, "Daily routine")); s.textContent = parse(selDate).toLocaleDateString(undefined, {month: "long", year: "numeric"}); }
-  if (view === "skin") { t.append(el("b", null, "Skin check")); s.textContent = "Tell us about your skin, get matched care"; }
-  if (view === "photos") { t.append(el("b", null, "Photo diary")); s.textContent = photos.length ? `${photos.length} photo${photos.length>1?"s":""} so far` : "Track how your skin changes"; }
-  const av = $("#avatar"); av.textContent = "";
-  if (photos[0]) { const i = el("img"); i.src = blobURL(photos[0].assetId); i.alt = ""; i.onerror = () => { av.textContent = letterOf(firstName || "Me"); }; av.append(i); }
-  else av.textContent = firstName ? letterOf(firstName) : "";
-  if (!photos[0] && !firstName) av.innerHTML = FACE_SVG;
+  if (view === "journey") { t.append(el("b", null, "My Skin Journey")); s.textContent = photos.length ? `${photos.length} photo${photos.length>1?"s":""} so far · skin tips below` : "Your photos and skin tips in one place"; }
+  if (view === "profile") { t.append(el("b", null, "Profile")); s.textContent = "Settings, reminders and backup"; }
+  fillAvatar($("#avatar"));
 }
-$("#avatar").onclick = () => { location.hash = "photos"; };
+// profile photo (or latest face photo, then initial) used in the header and on the Profile page
+function fillAvatar(box) {
+  box.textContent = "";
+  const id = profilePhotoId() || (photos[0] && photos[0].assetId);
+  const src = id ? blobURL(id) : "";
+  if (src) { const i = el("img"); i.src = src; i.alt = ""; i.onerror = () => { box.textContent = letterOf(firstName || "Me"); }; box.append(i); }
+  else if (firstName) box.textContent = letterOf(firstName);
+  else box.innerHTML = FACE_SVG;
+}
+$("#avatar").onclick = () => { location.hash = "profile"; };
 function setView(v) {
-  if (!["shelf","routine","skin","photos"].includes(v)) v = "shelf";
+  if (v === "skin" || v === "photos") v = "journey";   // old links
+  if (!["shelf","routine","journey","profile"].includes(v)) v = "shelf";
   view = v;
-  ["shelf","routine","skin","photos"].forEach(k => $("#v-"+k).hidden = k !== v);
-  document.body.dataset.view = v;
+  ["shelf","routine","journey","profile"].forEach(k => $("#v-"+k).hidden = k !== v);
+  document.documentElement.dataset.view = v;
   $("#headx").hidden = v !== "routine";
   document.querySelectorAll(".nav button").forEach(b => { if (b.dataset.view === v) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
   const fab = $("#fab");
-  fab.hidden = !canWrite || !(v === "shelf" || (v === "photos" && assets));
-  fab.textContent = v === "photos" ? "+ Add photo" : "+ Add product";
+  fab.hidden = !canWrite || !(v === "shelf" || (v === "journey" && assets));
+  fab.textContent = v === "journey" ? "+ Add photo" : "+ Add product";
   renderAll(); window.scrollTo(0, 0);
 }
 document.querySelectorAll(".nav button").forEach(b => b.onclick = () => { location.hash = b.dataset.view; });
 window.addEventListener("hashchange", () => setView(location.hash.slice(1)));
-$("#fab").onclick = () => view === "photos" ? $("#photoInput").click() : openProduct(null);
+$("#fab").onclick = () => view === "journey" ? $("#photoInput").click() : openProduct(null);
 $("#rsum").onclick = () => { selDate = iso(today0()); location.hash = "routine"; };
-$("#banner").onclick = $("#scanpill").onclick = () => { location.hash = "skin"; };
+$("#banner").onclick = $("#scanpill").onclick = () => {
+  if (view !== "journey") location.hash = "journey";
+  setTimeout(() => { const h = $("#tipsHead"); if (h) h.scrollIntoView({behavior: "smooth", block: "start"}); }, 80);
+};
+$("#heroAddPhoto").onclick = () => $("#photoInput").click();
 function renderCutList() {
   const list = $("#cutList"); list.textContent = "";
   if (!bannerCuts.length) list.append(el("div", "empty", "No pictures yet. The banner shows a bottle drawing until you add one."));
@@ -766,8 +836,8 @@ function renderAll() {
   renderHeader();
   if (view === "shelf") renderShelf();
   if (view === "routine") renderRoutine();
-  if (view === "skin") renderSkin();
-  if (view === "photos") renderPhotos();
+  if (view === "journey") { renderPhotos(); renderSkin(); }
+  if (view === "profile") renderProfile();
 }
 
 // ================= SHELF =================
@@ -806,6 +876,8 @@ function renderShelf() {
   const al = $("#alerts"); al.textContent = "";
   if (bad.length) al.append(el("div", "alert bad", `${bad.length} product${bad.length>1?"s have":" has"} expired. Time to toss ${bad.length>1?"them":"it"}.`));
   if (soon.length) al.append(el("div", "alert", `Use up soon: ${soon.map(e => `${e.p.name} (${e.s.daysLeft} day${e.s.daysLeft===1?"":"s"})`).join(", ")}`));
+  const nudge = routineNudge();
+  if (nudge) { const n = el("button", "alert info nudge", nudge); n.type = "button"; n.onclick = () => { selDate = iso(today0()); slot = new Date().getHours() < 15 ? "am" : "pm"; location.hash = "routine"; }; al.prepend(n); }
 
   const tb = $("#tabs"); tb.textContent = "";
   SHELF_TABS.forEach(t => {
@@ -1244,6 +1316,7 @@ function renderResult(a) {
 
 // ================= PHOTOS =================
 function renderPhotos() {
+  $("#photoCount").textContent = photos.length ? `${photos.length} photo${photos.length > 1 ? "s" : ""}` : "";
   $("#cmpBar").hidden = photos.length < 2;
   $("#cmpBtn").textContent = compareMode ? "Cancel" : "Compare two photos";
   $("#cmpHint").textContent = compareMode ? `Tap 2 photos (${compareSel.length}/2)` : "";
@@ -1410,15 +1483,59 @@ function blobURL(id) { return Photos.url(id); }
 // ---------- settings: name, backup, Google Sheet import ----------
 const NAME_KEY = "skincare-shelf-name";
 function loadName() { try { firstName = (localStorage.getItem(NAME_KEY) || "").trim(); } catch { firstName = ""; } }
-function openSettings() {
+// ---------- Profile page ----------
+const APP_VERSION = "1.5 · 16 Nov 2026";
+const AVATAR_KEY = "skincare-shelf-avatar";
+function profilePhotoId() { try { const id = localStorage.getItem(AVATAR_KEY) || ""; return id && Photos.url(id) ? id : ""; } catch { return ""; } }
+let profileFilled = false;   // fill the form fields once per visit so typing isn't overwritten
+function renderProfile() {
+  fillAvatar($("#profAvatar"));
+  $("#profPhotoRemove").hidden = !profilePhotoId();
+  const n = items.length, ph = photos.length;
+  $("#set-stats").textContent = `On this phone: ${n} product${n === 1 ? "" : "s"}, ${ph} face photo${ph === 1 ? "" : "s"}.`;
+  $("#appVersion").textContent = `Skincare Shelf · version ${APP_VERSION}`;
+  if (profileFilled) return;
+  profileFilled = true;
   $("#set-name").value = firstName;
+  const r = loadRem(); $("#rem-am").value = r.am; $("#rem-pm").value = r.pm; $("#rem-exp").checked = r.exp; $("#rem-msg").textContent = "";
   try { $("#set-sheet").value = localStorage.getItem("skincare-shelf-sheet") || ""; } catch {}
-  const n = items.length, ph = Photos.ids().length;
-  $("#set-stats").textContent = `On this phone: ${n} product${n === 1 ? "" : "s"}, ${ph} photo${ph === 1 ? "" : "s"}.`;
-  $("#set-sheetMsg").textContent = ""; $("#set-restoreRow").hidden = true;
-  openSheet("#ssheet");
+  $("#set-sheetMsg").textContent = ""; $("#set-restoreRow").hidden = true; $("#updateMsg").textContent = "";
 }
-$("#avatar").onclick = openSettings;
+window.addEventListener("hashchange", () => { profileFilled = false; });
+function openSettings() { profileFilled = false; location.hash = "profile"; }
+// profile photo from camera or album
+const avatarInput = document.createElement("input"); avatarInput.type = "file"; avatarInput.accept = "image/*"; avatarInput.hidden = true; document.body.append(avatarInput);
+$("#profPhoto").onclick = () => avatarInput.click();
+avatarInput.addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  try {
+    const blob = await shrink(f, 600);
+    const old = profilePhotoId();
+    const up = await Photos.upload(blob);
+    try { localStorage.setItem(AVATAR_KEY, up.id); } catch {}
+    if (old) Photos.delete(old).catch(() => {});
+    renderAll(); toast("Profile photo updated");
+  } catch { toast("Couldn't use that photo. Try another one."); }
+});
+$("#profPhotoRemove").onclick = () => {
+  const old = profilePhotoId();
+  try { localStorage.removeItem(AVATAR_KEY); } catch {}
+  if (old) Photos.delete(old).catch(() => {});
+  renderAll(); toast("Profile photo removed");
+};
+// app updates: ask the offline worker to fetch the newest version, then reload
+$("#checkUpdate").onclick = async () => {
+  const msg = $("#updateMsg"); msg.textContent = "Checking…";
+  try {
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if (!reg) { msg.textContent = "Updates load automatically when you open the app online."; return; }
+    await reg.update();
+    const waiting = reg.installing || reg.waiting;
+    if (waiting) { msg.textContent = "Update found. Reloading…"; setTimeout(() => location.reload(), 800); }
+    else msg.textContent = "You have the latest version.";
+  } catch { msg.textContent = "Couldn't check right now. Make sure you're online."; }
+};
 $("#set-name").addEventListener("input", e => { firstName = e.target.value.trim(); try { localStorage.setItem(NAME_KEY, firstName); } catch {} renderHeader(); });
 
 const blobToDataURL = b => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(null); r.readAsDataURL(b); });
@@ -1428,7 +1545,7 @@ $("#set-export").onclick = async () => {
   try {
     const photosOut = {};
     for (const id of Photos.ids()) { const b = await Photos.getBlob(id); if (b) photosOut[id] = await blobToDataURL(b); }
-    const backup = {app: "skincare-shelf", version: 1, exportedAt: new Date().toISOString(), name: firstName, data: LocalDB.exportData(), photos: photosOut};
+    const backup = {app: "skincare-shelf", version: 1, exportedAt: new Date().toISOString(), name: firstName, avatar: profilePhotoId(), reminders: loadRem(), data: LocalDB.exportData(), photos: photosOut};
     const file = new File([JSON.stringify(backup)], `skincare-shelf-backup-${iso(today0())}.json`, {type: "application/json"});
     if (navigator.canShare && navigator.canShare({files: [file]})) {
       try { await navigator.share({files: [file], title: "Skincare Shelf backup"}); toast("Backup ready"); return; } catch (e) { if (e && e.name === "AbortError") return; }
@@ -1462,6 +1579,8 @@ $("#set-restoreYes").onclick = async () => {
     for (const [id, u] of Object.entries(j.photos || {})) { try { await Photos.put(id, await dataURLToBlob(u)); } catch {} }
     LocalDB.replaceAll(j.data);
     if (j.name) { firstName = j.name; try { localStorage.setItem(NAME_KEY, firstName); } catch {} }
+    try { if (j.avatar) localStorage.setItem(AVATAR_KEY, j.avatar); if (j.reminders) saveRem(j.reminders); } catch {}
+    profileFilled = false;
     closeSheets(); toast("Backup restored");
   } catch { toast("Couldn't restore that backup."); }
 };
@@ -1540,6 +1659,57 @@ $("#set-sheetGo").onclick = async () => {
       : "Couldn't read that sheet. In Google Sheets, tap Share → General access → Anyone with the link → Viewer, then try again.";
   } finally { btn.disabled = false; btn.textContent = "Import"; }
 };
+
+// ---------- reminders (Calendar alerts + a nudge on Home) ----------
+const REM_KEY = "skincare-shelf-reminders";
+function loadRem() { const d = {am: "07:00", pm: "21:00", exp: true}; try { return {...d, ...(JSON.parse(localStorage.getItem(REM_KEY)) || {})}; } catch { return d; } }
+function saveRem(r) { try { localStorage.setItem(REM_KEY, JSON.stringify(r)); } catch {} }
+function routineNudge() {
+  const r = loadRem(), now = new Date(), hm = pad(now.getHours()) + ":" + pad(now.getMinutes());
+  const k = now.getHours() < 15 ? "am" : "pm";
+  if (!r[k] || hm < r[k]) return "";
+  const steps = stepsFor(k, today0()); if (!steps.length) return "";
+  const done = (((logs[iso(today0())] || {})[k]) || []).filter(id => steps.some(s => s.id === id)).length;
+  if (done >= steps.length) return "";
+  return `Time for your ${k === "am" ? "morning" : "night"} routine: ${done}/${steps.length} done. Tap to start →`;
+}
+const icsEsc = s => String(s).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+const icsDT = (d, hm) => { const [h, m] = hm.split(":").map(Number); return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(h)}${pad(m)}00`; };
+function buildICS(r) {
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const appURL = location.origin + location.pathname;
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Skincare Shelf//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Skincare Shelf"];
+  const ev = (uid, start, summary, desc, rrule) => {
+    L.push("BEGIN:VEVENT", `UID:${uid}@skincare-shelf`, `DTSTAMP:${stamp}`, `DTSTART:${start}`, "DURATION:PT10M", `SUMMARY:${icsEsc(summary)}`, `DESCRIPTION:${icsEsc(desc)}`, `URL:${appURL}`);
+    if (rrule) L.push(rrule);
+    L.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc(summary)}`, "TRIGGER:PT0M", "END:VALARM", "END:VEVENT");
+  };
+  const t = today0();
+  [["am", "Morning skincare routine ☀️"], ["pm", "Night skincare routine 🌙"]].forEach(([k, title]) => {
+    if (!r[k]) return;
+    const steps = routine[k].map((st, i) => `${i + 1}. ${stepInfo(st).name}`).join("\n") || "Open Skincare Shelf to set up your steps.";
+    ev(`routine-${k}`, icsDT(t, r[k]), title, `${steps}\n\nOpen the app: ${appURL}`, "RRULE:FREQ=DAILY");
+  });
+  let expCount = 0;
+  if (r.exp) items.forEach(p => {
+    const s = statusOf(p); if (s.key !== "use" || !s.goodUntil) return; // products you are using now
+    const d = addDays(s.goodUntil, -7); if (d < t) return;
+    ev(`expiry-${p.id}`, icsDT(d, "09:00"), `Use up soon: ${p.name}`, `${p.name} expires on ${fmt(s.goodUntil)}.`, null); expCount++;
+  });
+  L.push("END:VCALENDAR");
+  return {text: L.join("\r\n") + "\r\n", expCount};
+}
+$("#rem-add").onclick = () => {
+  const r = {am: $("#rem-am").value, pm: $("#rem-pm").value, exp: $("#rem-exp").checked}; saveRem(r);
+  const {text, expCount} = buildICS(r);
+  const file = new File([text], "skincare-reminders.ics", {type: "text/calendar"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  const parts = [r.am && `morning at ${r.am}`, r.pm && `night at ${r.pm}`].filter(Boolean);
+  $("#rem-msg").textContent = `Reminders file made: daily ${parts.join(" and ")}${expCount ? `, plus ${expCount} expiry alert${expCount > 1 ? "s" : ""}` : ""}. Open it and tap "Add All" to put them in your Calendar. Changed your times? Delete the old "Skincare" events first, then add again.`;
+  renderAll();
+};
+["#rem-am", "#rem-pm", "#rem-exp"].forEach(id => $(id).addEventListener("change", () => { saveRem({am: $("#rem-am").value, pm: $("#rem-pm").value, exp: $("#rem-exp").checked}); renderAll(); }));
 
 // ---------- start ----------
 setView(location.hash.slice(1) || "shelf");

@@ -1,4 +1,4 @@
-# Skincare Shelf
+# The Skin Diary
 
 A small phone app to track skincare: what's new, in use, expiring soon or finished, plus a morning/night routine checklist, skin tips and a private photo diary.
 
@@ -19,4 +19,4 @@ It works offline after the first visit.
 |---|---|
 | `index.html` | The whole app |
 | `sw.js` | Offline support |
-| `manifest.webmanifest`, `icon*.png`, `icon.svg`, `apple-touch-icon.png` | Home-screen app name and icon |
+| `manifest.webmanifest`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon.png` | Home-screen app name and icon |

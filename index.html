@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Skincare Shelf</title>
+<title>The Skin Diary</title>
 <meta name="description" content="Track your skincare: what's new, in use, expiring or finished. Data stays on your phone.">
 <meta name="theme-color" content="#fbe3dc">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Skincare">
+<meta name="apple-mobile-web-app-title" content="Skin Diary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,500;1,600&display=swap">
 <style>
@@ -1493,7 +1493,7 @@ function renderProfile() {
   $("#profPhotoRemove").hidden = !profilePhotoId();
   const n = items.length, ph = photos.length;
   $("#set-stats").textContent = `On this phone: ${n} product${n === 1 ? "" : "s"}, ${ph} face photo${ph === 1 ? "" : "s"}.`;
-  $("#appVersion").textContent = `Skincare Shelf · version ${APP_VERSION}`;
+  $("#appVersion").textContent = `The Skin Diary · version ${APP_VERSION}`;
   if (profileFilled) return;
   profileFilled = true;
   $("#set-name").value = firstName;
@@ -1546,9 +1546,9 @@ $("#set-export").onclick = async () => {
     const photosOut = {};
     for (const id of Photos.ids()) { const b = await Photos.getBlob(id); if (b) photosOut[id] = await blobToDataURL(b); }
     const backup = {app: "skincare-shelf", version: 1, exportedAt: new Date().toISOString(), name: firstName, avatar: profilePhotoId(), reminders: loadRem(), data: LocalDB.exportData(), photos: photosOut};
-    const file = new File([JSON.stringify(backup)], `skincare-shelf-backup-${iso(today0())}.json`, {type: "application/json"});
+    const file = new File([JSON.stringify(backup)], `the-skin-diary-backup-${iso(today0())}.json`, {type: "application/json"});
     if (navigator.canShare && navigator.canShare({files: [file]})) {
-      try { await navigator.share({files: [file], title: "Skincare Shelf backup"}); toast("Backup ready"); return; } catch (e) { if (e && e.name === "AbortError") return; }
+      try { await navigator.share({files: [file], title: "The Skin Diary backup"}); toast("Backup ready"); return; } catch (e) { if (e && e.name === "AbortError") return; }
     }
     const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
@@ -1568,7 +1568,7 @@ $("#restoreInput").addEventListener("change", async e => {
     const n = Object.keys((j.data && j.data.products) || {}).length;
     $("#set-restoreMsg").textContent = `This backup has ${n} products from ${fmt(new Date(j.exportedAt))}. Restoring replaces everything on this phone.`;
     $("#set-restoreRow").hidden = false;
-  } catch { toast("That file isn't a Skincare Shelf backup."); }
+  } catch { toast("That file isn't a Skin Diary backup."); }
 });
 $("#set-restoreNo").onclick = () => { pendingRestore = null; $("#set-restoreRow").hidden = true; };
 $("#set-restoreYes").onclick = async () => {
@@ -1678,7 +1678,7 @@ const icsDT = (d, hm) => { const [h, m] = hm.split(":").map(Number); return `${d
 function buildICS(r) {
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
   const appURL = location.origin + location.pathname;
-  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Skincare Shelf//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Skincare Shelf"];
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//The Skin Diary//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:The Skin Diary"];
   const ev = (uid, start, summary, desc, rrule) => {
     L.push("BEGIN:VEVENT", `UID:${uid}@skincare-shelf`, `DTSTAMP:${stamp}`, `DTSTART:${start}`, "DURATION:PT10M", `SUMMARY:${icsEsc(summary)}`, `DESCRIPTION:${icsEsc(desc)}`, `URL:${appURL}`);
     if (rrule) L.push(rrule);
@@ -1687,7 +1687,7 @@ function buildICS(r) {
   const t = today0();
   [["am", "Morning skincare routine ☀️"], ["pm", "Night skincare routine 🌙"]].forEach(([k, title]) => {
     if (!r[k]) return;
-    const steps = routine[k].map((st, i) => `${i + 1}. ${stepInfo(st).name}`).join("\n") || "Open Skincare Shelf to set up your steps.";
+    const steps = routine[k].map((st, i) => `${i + 1}. ${stepInfo(st).name}`).join("\n") || "Open The Skin Diary to set up your steps.";
     ev(`routine-${k}`, icsDT(t, r[k]), title, `${steps}\n\nOpen the app: ${appURL}`, "RRULE:FREQ=DAILY");
   });
   let expCount = 0;
@@ -1702,11 +1702,11 @@ function buildICS(r) {
 $("#rem-add").onclick = () => {
   const r = {am: $("#rem-am").value, pm: $("#rem-pm").value, exp: $("#rem-exp").checked}; saveRem(r);
   const {text, expCount} = buildICS(r);
-  const file = new File([text], "skincare-reminders.ics", {type: "text/calendar"});
+  const file = new File([text], "skin-diary-reminders.ics", {type: "text/calendar"});
   const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
   const parts = [r.am && `morning at ${r.am}`, r.pm && `night at ${r.pm}`].filter(Boolean);
-  $("#rem-msg").textContent = `Reminders file made: daily ${parts.join(" and ")}${expCount ? `, plus ${expCount} expiry alert${expCount > 1 ? "s" : ""}` : ""}. Open it and tap "Add All" to put them in your Calendar. Changed your times? Delete the old "Skincare" events first, then add again.`;
+  $("#rem-msg").textContent = `Reminders file made: daily ${parts.join(" and ")}${expCount ? `, plus ${expCount} expiry alert${expCount > 1 ? "s" : ""}` : ""}. Open it and tap "Add All" to put them in your Calendar. Changed your times? Delete the old skincare routine and "Use up soon" events first, then add again.`;
   renderAll();
 };
 ["#rem-am", "#rem-pm", "#rem-exp"].forEach(id => $(id).addEventListener("change", () => { saveRem({am: $("#rem-am").value, pm: $("#rem-pm").value, exp: $("#rem-exp").checked}); renderAll(); }));

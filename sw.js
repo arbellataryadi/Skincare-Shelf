@@ -1,6 +1,6 @@
 // Offline support: keep the app and its fonts cached so it opens without internet.
-const VERSION = "skincare-shelf-v5";
-const APP_FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+const VERSION = "skincare-shelf-v7";
+const APP_FILES = ["./", "./index.html", "./manifest.webmanifest", "./favicon.png", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(APP_FILES)).then(() => self.skipWaiting()));

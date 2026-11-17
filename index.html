@@ -449,6 +449,22 @@ html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, va
 .editstep .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
 .daypick .sublbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
 .weekrow .chip.wk { padding: 6px 0; width: 46px; font-size: 12px; text-align: center; }
+/* searchable product list in Add a step */
+input[type="search"] { width: 100%; font: 16px var(--font-body); padding: 12px 14px 12px 40px; border-radius: var(--r-sm); border: 1px solid var(--line); color: var(--fg); -webkit-appearance: none; appearance: none;
+  background: var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239e9ca5' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") no-repeat 13px 50% / 18px; }
+input[type="search"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+label .note { font-weight: 400; margin-left: 6px; }
+.picklist { margin-top: 8px; max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 2px; -webkit-overflow-scrolling: touch; }
+.pickrow { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; width: 100%; text-align: left; border: 2px solid transparent; background: var(--panel); border-radius: 14px; padding: 6px 10px 6px 6px; font: inherit; color: var(--fg); cursor: pointer; }
+.pickrow .pthumb { width: 44px; height: 44px; border-radius: 12px; font-size: 18px; }
+.pickrow .pt { min-width: 0; display: flex; flex-direction: column; }
+.pickrow .pt b { font-size: 14px; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
+.pickrow .pt small { font-size: 12px; color: var(--muted); }
+.pickrow[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.pickrow:disabled { opacity: .45; cursor: default; }
+.pickrow.other .pthumb { background: var(--surface-2); color: var(--muted); font-family: var(--font-body); font-style: normal; }
+.pickrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pickempty { padding: 6px 4px; }
 </style>
 </head>
 <body>
@@ -580,6 +596,7 @@ html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, va
       <p class="note" id="appVersion"></p>
       <div><span class="lbl">What's new</span>
         <ul class="tips">
+          <li>Search your products when adding a routine step.</li>
           <li>Monthly steps: run exfoliation or masks once or twice a month, in the weeks you choose.</li>
           <li>Custom days for routine steps: Mon · Wed · Fri, weekends, or any days you pick.</li>
           <li>Category previews on Home: tap Toner, Serum, Vitamins and more to filter your shelf.</li>
@@ -643,7 +660,11 @@ html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, va
     <div class="steps" id="editList"></div>
     <div class="editstep">
       <h3>Add a step</h3>
-      <div><label for="r-pick">Product</label><select id="r-pick"></select></div>
+      <div><label for="r-search">Product <span class="note" id="r-count"></span></label>
+        <input type="search" id="r-search" placeholder="Search your products…" autocomplete="off" enterkeyhint="search">
+        <div class="picklist" id="r-results" role="listbox" aria-label="Your products"></div>
+        <select id="r-pick" hidden aria-hidden="true"></select>
+      </div>
       <div id="r-otherRow" hidden><label for="r-other">Step name</label><input type="text" id="r-other" placeholder="e.g. Ice roller, Lip balm"></div>
       <div id="r-days"></div>
       <button type="button" class="btn primary" id="r-add">Add step</button>
@@ -1321,8 +1342,43 @@ function renderEditor() {
   const o = el("option", null, "Something not on my shelf…"); o.value = "__other"; pick.append(o);
   $("#r-otherRow").hidden = pick.value !== "__other";
   renderNewStepDays();
+  renderPickList();
 }
 $("#r-pick").onchange = () => { $("#r-otherRow").hidden = $("#r-pick").value !== "__other"; };
+// searchable product list for "Add a step"
+function renderPickList() {
+  const q = $("#r-search").value.trim().toLowerCase();
+  const pick = $("#r-pick");
+  const usable = items.filter(p => ["use", "new"].includes(statusOf(p).key))
+    .sort((a, b) => (ORDER[a.type] || 16.5) - (ORDER[b.type] || 16.5) || a.name.localeCompare(b.name));
+  const match = p => !q || [p.name, p.type, p.category, p.note].some(v => (v || "").toLowerCase().includes(q));
+  const found = usable.filter(match);
+  const inRoutine = id => routine[slot].some(st => st.productId === id);
+  // keep the selection on something visible
+  const visibleIds = found.filter(p => !inRoutine(p.id)).map(p => p.id);
+  if (pick.value !== "__other" && !visibleIds.includes(pick.value)) pick.value = visibleIds[0] || "__other";
+  $("#r-otherRow").hidden = pick.value !== "__other";
+  const box = $("#r-results"); box.textContent = "";
+  $("#r-count").textContent = q ? `${found.length} found` : `${usable.length} products`;
+  if (!found.length) box.append(el("p", "note pickempty", `No products match "${$("#r-search").value.trim()}".`));
+  found.slice(0, 60).forEach(p => {
+    const added = inRoutine(p.id), s = statusOf(p);
+    const row = el("button", "pickrow"); row.type = "button"; row.setAttribute("role", "option");
+    row.setAttribute("aria-selected", String(pick.value === p.id)); row.disabled = added;
+    const th = smallThumb(p); th.classList.add(tint(p.type));
+    const txt = el("span", "pt"); txt.append(el("b", null, p.name), el("small", null, `${p.type || "Other"}${s.key === "new" ? " · sealed" : ""}${added ? " · already in this routine" : ""}`));
+    row.append(th, txt);
+    row.onclick = () => { pick.value = p.id; renderPickList(); };
+    box.append(row);
+  });
+  if (found.length > 60) box.append(el("p", "note pickempty", `Showing 60 of ${found.length}. Type more to narrow it down.`));
+  const other = el("button", "pickrow other"); other.type = "button"; other.setAttribute("role", "option");
+  other.setAttribute("aria-selected", String(pick.value === "__other"));
+  other.append(el("span", "pthumb", "+"), el("span", "pt", "Something not on my shelf…"));
+  other.onclick = () => { pick.value = "__other"; renderPickList(); setTimeout(() => $("#r-other").focus(), 30); };
+  box.append(other);
+}
+$("#r-search").addEventListener("input", renderPickList);
 $("#r-add").onclick = () => {
   const v = $("#r-pick").value;
   if (v === "__other") {
@@ -1332,7 +1388,7 @@ $("#r-add").onclick = () => {
     if (routine[slot].some(st => st.productId === v)) { toast("That product is already in this routine"); return; }
     routine[slot].push({id: uid(), productId: v, days: newStep.days, weeks: newStep.weeks});
   }
-  newStep = {days: null, weeks: null};
+  newStep = {days: null, weeks: null}; $("#r-search").value = "";
   saveRoutine(); renderEditor();
 };
 $("#r-sort").onclick = () => { routine[slot].sort((a,b) => (ORDER[stepInfo(a).type]||9) - (ORDER[stepInfo(b).type]||9)); saveRoutine(); renderEditor(); toast("Sorted"); };
@@ -1656,7 +1712,7 @@ function blobURL(id) { return Photos.url(id); }
 const NAME_KEY = "skincare-shelf-name";
 function loadName() { try { firstName = (localStorage.getItem(NAME_KEY) || "").trim(); } catch { firstName = ""; } }
 // ---------- Profile page ----------
-const APP_VERSION = "1.8 · 17 Nov 2026";
+const APP_VERSION = "1.9 · 17 Nov 2026";
 const AVATAR_KEY = "skincare-shelf-avatar";
 function profilePhotoId() { try { const id = localStorage.getItem(AVATAR_KEY) || ""; return id && Photos.url(id) ? id : ""; } catch { return ""; } }
 let profileFilled = false;   // fill the form fields once per visit so typing isn't overwritten

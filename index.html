@@ -422,6 +422,33 @@ html[data-view="journey"] .hero, html[data-view="journey"] .tipbox { background:
 .bigavatar svg { width: 44px; height: 44px; }
 html[data-view="journey"] .hero .btn.primary { background: var(--ink); color: var(--ink-fg); }
 html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, var(--surface-2) 88%, transparent); }
+/* category preview row on Home */
+.cats { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 2px 20px 4px; }
+.cats::-webkit-scrollbar { display: none; }
+.cat { flex: 0 0 auto; width: 70px; border: 0; background: none; padding: 0; color: var(--fg); font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.cat .pv { position: relative; width: 62px; height: 62px; border-radius: 20px; overflow: hidden; display: grid; place-items: center; border: 2px solid transparent; transition: border-color .15s, transform .15s; }
+.cat .pv.all { background: var(--surface-2); color: var(--fg); }
+.cat .pv.all svg { width: 24px; height: 24px; }
+.cat .pv img { width: 100%; height: 100%; object-fit: cover; }
+.cat .pv .ltr { font: italic 500 26px var(--font-accent); opacity: .45; }
+.cat .pv .ct { position: absolute; right: 4px; bottom: 4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--panel); color: var(--fg); font: 600 11px/20px var(--font-body); text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+.cat .nm { font-size: 12px; font-weight: 500; line-height: 1.2; text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat[aria-pressed="true"] .pv { border-color: var(--accent); transform: translateY(-2px); }
+.cat[aria-pressed="true"] .nm { color: var(--accent); font-weight: 600; }
+.cat:focus-visible { outline: none; } .cat:focus-visible .pv { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* custom type in the product form */
+.chip.addtype { background: transparent; border: 1.5px dashed var(--line); color: var(--muted); }
+.newtype { display: flex; gap: 8px; margin-top: 10px; }
+.newtype input { flex: 1; min-width: 0; }
+/* day picker for routine steps */
+.daypick { display: flex; flex-direction: column; gap: 8px; }
+.daypick .lbl { margin: 0; }
+.chip.preset { padding: 6px 11px; font-size: 12px; }
+.weekrow .chip.sm { width: 38px; padding: 6px 0; font-size: 12px; }
+.editstep .chip { background: var(--panel); }
+.editstep .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.daypick .sublbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.weekrow .chip.wk { padding: 6px 0; width: 46px; font-size: 12px; text-align: center; }
 </style>
 </head>
 <body>
@@ -457,6 +484,7 @@ html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, va
     </button>
     <div id="alerts" style="display:flex;flex-direction:column;gap:8px"></div>
     <div class="sechead"><h2>My shelf</h2><span class="note" id="shelfCount"></span></div>
+    <div class="cats" id="cats" role="group" aria-label="Filter by category"></div>
     <nav class="tabs" role="tablist" id="tabs"></nav>
     <div id="list"><div class="empty">Loading your shelf…</div></div>
     <p class="note">Expired means whichever comes first: the printed date, or the months-after-opening (the open-jar “12M” symbol) counted from the day you opened it.</p>
@@ -552,6 +580,10 @@ html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, va
       <p class="note" id="appVersion"></p>
       <div><span class="lbl">What's new</span>
         <ul class="tips">
+          <li>Monthly steps: run exfoliation or masks once or twice a month, in the weeks you choose.</li>
+          <li>Custom days for routine steps: Mon · Wed · Fri, weekends, or any days you pick.</li>
+          <li>Category previews on Home: tap Toner, Serum, Vitamins and more to filter your shelf.</li>
+          <li>Add your own product types with "+ New type".</li>
           <li>My Skin Journey: your photo diary and skin tips on one page.</li>
           <li>Profile: your photo, name, reminders, import and backup in one place.</li>
           <li>Calendar reminders for your routine and for products about to expire.</li>
@@ -592,7 +624,9 @@ html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, va
     </div>
     <div><label for="f-name">Product name</label><input type="text" id="f-name" placeholder="e.g. Somethinc Niacinamide serum" required></div>
     <div><label for="f-note">Note</label><input type="text" id="f-note" placeholder="e.g. 2 bottles, 3 sachets"></div>
-    <div><span class="lbl">Type</span><div class="chips" id="f-type"></div></div>
+    <div><span class="lbl">Type</span><div class="chips" id="f-type"></div>
+      <div class="newtype" id="f-newTypeRow" hidden><input type="text" id="f-newType" placeholder="e.g. Essence, Cleansing balm" maxlength="24" autocomplete="off"><button type="button" class="btn primary" id="f-newTypeAdd">Add</button></div>
+    </div>
     <div class="row2">
       <div><label for="f-exp">Expiry date (on box)</label><input type="date" id="f-exp"></div>
       <div><label for="f-open">Opened on</label><input type="date" id="f-open"><div class="hint">Empty if still sealed</div></div>
@@ -611,10 +645,11 @@ html[data-view="profile"] .panel .card { background-color: color-mix(in srgb, va
       <h3>Add a step</h3>
       <div><label for="r-pick">Product</label><select id="r-pick"></select></div>
       <div id="r-otherRow" hidden><label for="r-other">Step name</label><input type="text" id="r-other" placeholder="e.g. Ice roller, Lip balm"></div>
+      <div id="r-days"></div>
       <button type="button" class="btn primary" id="r-add">Add step</button>
     </div>
     <div class="formbtns"><button type="button" class="btn" id="r-sort">Sort in usual order</button><button type="button" class="btn primary" data-close>Done</button></div>
-    <p class="note">Usual order: cleanser, toner, exfoliant, serum, eye cream, moisturizer, then sunscreen in the morning. Tap the day letters to run a step only on some days, like an exfoliant twice a week.</p>
+    <p class="note">Usual order: cleanser, toner, exfoliant, serum, eye cream, moisturizer, then sunscreen in the morning. Each step can run on its own days: for example a retinol serum only on Mon, Wed and Fri, and a calming serum on the other days. Tap a day on the Calendar page to see that day's steps.</p>
   </div>
 </div>
 
@@ -672,6 +707,7 @@ const CLIMATES = ["Hot & humid","Air-conditioned indoors","Dry / cold","Lots of 
 const REC_TINTS = ["t-Serum","t-Cleanser","t-Moisturizer","t-Toner","t-Eye-cream","t-Sunscreen"];
 
 let items = [], routine = {am: [], pm: []}, logs = {}, skin = {}, photos = [];
+let catFilter = (() => { try { return localStorage.getItem("skincare-shelf-cat") || "All"; } catch { return "All"; } })();
 let tab = "use", view = "shelf", slot = new Date().getHours() < 15 ? "am" : "pm";
 let db = null, col = null, assets = null, sample = null, canWrite = true, sampleImages = false, firstName = "";
 let editingId = null, formType = "Serum", formPao = 12, formPhoto = {id: "", blob: null};
@@ -690,7 +726,8 @@ const DAY = 86400000;
 const fmt = d => d.toLocaleDateString(undefined, {day:"numeric", month:"short", year:"numeric"});
 const fmtShort = d => d.toLocaleDateString(undefined, {day:"numeric", month:"short"});
 const uid = () => Math.random().toString(36).slice(2, 10);
-const tint = type => "t-" + String(type || "Other").replace(/\s+/g, "-");
+const CUSTOM_TINTS = ["t-Toner", "t-Serum", "t-Moisturizer", "t-Eye-cream", "t-Cleanser", "t-Sunscreen"];
+const tint = type => { const t = String(type || "Other"); if (TYPES.includes(t)) return "t-" + t.replace(/\s+/g, "-"); let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) | 0; return CUSTOM_TINTS[Math.abs(h) % CUSTOM_TINTS.length]; };
 const letterOf = name => ((name || "?").trim().charAt(0) || "?").toUpperCase();
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const FACE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4.4 0 7 3.4 7 8 0 5-3.2 10-7 10s-7-5-7-10c0-4.6 2.6-8 7-8z"/><path d="M9.5 11h.01M14.5 11h.01M10 16c1.2.8 2.8.8 4 0"/></svg>';
@@ -879,6 +916,30 @@ function renderShelf() {
   const nudge = routineNudge();
   if (nudge) { const n = el("button", "alert info nudge", nudge); n.type = "button"; n.onclick = () => { selDate = iso(today0()); slot = new Date().getHours() < 15 ? "am" : "pm"; location.hash = "routine"; }; al.prepend(n); }
 
+  // category preview row: All + every type on your shelf, each with a product photo preview
+  const typeOf = p => p.type || "Other";
+  const cats = [...new Set(items.map(typeOf))].sort((a, b) => (ORDER[a] || 16.5) - (ORDER[b] || 16.5) || a.localeCompare(b));
+  if (items.length && catFilter !== "All" && !cats.includes(catFilter)) catFilter = "All";
+  const cr = $("#cats"); cr.textContent = ""; cr.hidden = !items.length;
+  ["All", ...cats].forEach(c => {
+    const inCat = c === "All" ? items : items.filter(p => typeOf(p) === c);
+    const b = el("button", "cat"); b.type = "button"; b.setAttribute("aria-pressed", String(c === catFilter));
+    b.setAttribute("aria-label", `${c}, ${inCat.length} products`);
+    const pv = el("span", "pv " + (c === "All" ? "all" : tint(c)));
+    const withPhoto = inCat.find(p => p.photoId && blobURL(p.photoId));
+    if (withPhoto) { const i = el("img"); i.src = blobURL(withPhoto.photoId); i.alt = ""; i.loading = "lazy"; pv.append(i); }
+    else if (c === "All") pv.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>';
+    else pv.append(el("span", "ltr", letterOf(c)));
+    pv.append(el("span", "ct", inCat.length));
+    b.append(pv, el("span", "nm", c === "All" ? "All" : c));
+    b.onclick = () => { catFilter = c; try { localStorage.setItem("skincare-shelf-cat", c); } catch {} renderShelf(); };
+    cr.append(b);
+  });
+  const selCat = cr.querySelector('[aria-pressed="true"]');
+  if (selCat) requestAnimationFrame(() => { const want = selCat.offsetLeft - cr.offsetLeft - (cr.clientWidth - selCat.offsetWidth) / 2; if (Math.abs(cr.scrollLeft - want) > selCat.offsetWidth) cr.scrollLeft = Math.max(0, want); });
+  const enrichedF = catFilter === "All" ? enriched : enriched.filter(e => typeOf(e.p) === catFilter);
+  Object.keys(counts).forEach(k => counts[k] = 0); enrichedF.forEach(e => counts[e.s.key]++);
+
   const tb = $("#tabs"); tb.textContent = "";
   SHELF_TABS.forEach(t => {
     const b = el("button", "tab"); b.type = "button"; b.setAttribute("role","tab");
@@ -889,7 +950,7 @@ function renderShelf() {
   });
 
   const list = $("#list"); list.textContent = "";
-  let shown = enriched.filter(e => e.s.key === tab);
+  let shown = enrichedF.filter(e => e.s.key === tab);
   shown.sort((a,b) => (a.s.daysLeft ?? 1e9) - (b.s.daysLeft ?? 1e9));
   if (tab === "done") shown.sort((a,b) => (b.p.finished||"").localeCompare(a.p.finished||""));
   if (loaded && !items.length) {
@@ -900,7 +961,8 @@ function renderShelf() {
   }
   if (!shown.length) {
     const msg = {use:"Nothing open right now. Tap a new product and choose Open it today when you start using it.", new:"No sealed products. Tap + Add product after you buy something.", bad:"Nothing expired. Nice.", done:"Products you finish land here, so you remember what you liked."}[tab];
-    list.append(el("div", "empty", loaded ? msg : "Loading your shelf…")); return;
+    const label = SHELF_TABS.find(t => t.key === tab).label.toLowerCase();
+    list.append(el("div", "empty", !loaded ? "Loading your shelf…" : catFilter !== "All" ? `No ${catFilter.toLowerCase()} products in ${label}.` : msg)); return;
   }
   const grid = el("div", "pgrid");
   shown.forEach(({p, s}) => grid.append(productTile(p, s)));
@@ -997,6 +1059,35 @@ $("#prodPhotoInput").addEventListener("change", async e => {
   const f = e.target.files && e.target.files[0]; e.target.value = "";
   if (!f) return; formPhoto = {id: "", blob: await shrink(f, 800)}; renderFormPhoto();
 });
+// ---------- product types, including your own ----------
+let pendingTypes = [];   // custom types typed in the form but not saved on a product yet
+function allTypes() {
+  const base = TYPES.filter(t => t !== "Other");
+  const custom = [...new Set([...items.map(p => p.type).filter(t => t && !TYPES.includes(t)), ...pendingTypes])].sort((a, b) => a.localeCompare(b));
+  return [...base, ...custom, "Other"];
+}
+function renderTypeChips() {
+  const box = $("#f-type");
+  if (formType && !allTypes().includes(formType)) pendingTypes.push(formType);
+  chips(box, allTypes(), formType, v => v, v => { formType = v; $("#f-newTypeRow").hidden = true; });
+  const add = el("button", "chip addtype", "+ New type"); add.type = "button";
+  add.onclick = () => { const r = $("#f-newTypeRow"); r.hidden = !r.hidden; if (!r.hidden) setTimeout(() => $("#f-newType").focus(), 30); };
+  box.append(add);
+}
+function addCustomType() {
+  const raw = $("#f-newType").value.replace(/\s+/g, " ").trim();
+  if (!raw) { $("#f-newType").focus(); return; }
+  const name = raw.charAt(0).toUpperCase() + raw.slice(1);
+  const existing = allTypes().find(t => t.toLowerCase() === name.toLowerCase());
+  formType = existing || name;
+  if (!existing) pendingTypes.push(name);
+  $("#f-newType").value = ""; $("#f-newTypeRow").hidden = true;
+  $("#f-newTypeRow").hidden = true; $("#f-newType").value = "";
+  renderTypeChips();
+}
+$("#f-newTypeAdd").onclick = addCustomType;
+$("#f-newType").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addCustomType(); } });
+
 function openProduct(p, asNew) {
   closeSheets();
   editingId = p && !asNew ? p.id : null;
@@ -1006,7 +1097,8 @@ function openProduct(p, asNew) {
   $("#f-exp").value = p && !asNew ? (p.expiry || "") : "";
   $("#f-open").value = p && !asNew ? (p.opened || "") : "";
   formType = p && p.type ? p.type : "Serum"; formPao = p && p.pao ? p.pao : 12;
-  chips($("#f-type"), TYPES, formType, v => v, v => formType = v);
+  $("#f-newTypeRow").hidden = true; $("#f-newType").value = "";
+  renderTypeChips();
   chips($("#f-pao"), PAOS, formPao, v => v + "M", v => formPao = v);
   formPhoto = {id: (p && p.photoId) || "", blob: null};
   $("#f-photoRow").hidden = !assets; renderFormPhoto();
@@ -1047,7 +1139,7 @@ function stepInfo(st) {
   else if (p) { const s = statusOf(p); if (s.key === "bad") warn = "Expired. Replace it."; else if (s.key === "done") warn = "Marked finished. Replace it."; else if (s.soon) warn = `Use up within ${s.daysLeft} days`; }
   return {name, type, warn, p};
 }
-const stepsFor = (k, date) => { const d = date.getDay(); return routine[k].filter(st => !st.days || st.days.includes(d)); };
+const stepsFor = (k, date) => routine[k].filter(st => runsOn(st, date));
 function dayState(key) {
   const l = logs[key]; if (!l) return "";
   const total = (l.amTotal || 0) + (l.pmTotal || 0), got = (l.am || []).length + (l.pm || []).length;
@@ -1088,7 +1180,7 @@ function renderRoutine() {
   steps.forEach((st, i) => {
     const info = stepInfo(st), isDone = done.includes(st.id);
     const row = el("div", "step " + tint(info.type) + (isDone ? " done" : ""));
-    const what = el("div", "what"); what.append(el("small", null, `Step ${i + 1} · ${info.type}`), el("b", null, info.name));
+    const what = el("div", "what"); what.append(el("small", null, `Step ${i + 1} · ${info.type}${st.days || st.weeks ? " · " + schedLabel(st) : ""}`), el("b", null, info.name));
     if (info.warn) what.append(el("span", "warn", info.warn));
     const c = el("button", "check"); c.type = "button"; c.setAttribute("role","checkbox"); c.setAttribute("aria-checked", String(isDone)); c.setAttribute("aria-label", "Done: " + info.name);
     c.innerHTML = isDone ? CHECK_SVG : ""; c.disabled = !canWrite || isFuture;
@@ -1114,6 +1206,96 @@ $("#seg-pm").onclick = () => { slot = "pm"; renderRoutine(); };
 
 function saveRoutine() { const snap = JSON.parse(JSON.stringify(routine)); writeDoc("settings/routine", () => db.doc("settings/routine").set(snap)); }
 $("#editRoutine").onclick = () => { renderEditor(); openSheet("#rsheet"); };
+// ---------- custom schedule per step: which days, and which weeks of the month ----------
+const DAY_PRESETS = [["Every day", null], ["Mon · Wed · Fri", [1, 3, 5]], ["Tue · Thu · Sat", [2, 4, 6]], ["Weekdays", [1, 2, 3, 4, 5]], ["Weekends", [0, 6]]];
+const WEEK_PRESETS = [["Every week", null], ["Once a month", [1]], ["Twice a month", [1, 3]]];
+const WEEK_NAMES = {1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "Last"};
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];   // Monday first
+const sameDays = (a, b) => (!a && !b) || (!!a && !!b && a.length === b.length && a.every((x, i) => x === b[i]));
+function daysLabel(days) {
+  if (!days) return "Every day";
+  const p = DAY_PRESETS.find(([, d]) => d && sameDays(d, days)); if (p) return p[0];
+  return WEEK_ORDER.filter(d => days.includes(d)).map(d => DAY_NAMES[d].slice(0, 3)).join(", ");
+}
+function weeksLabel(weeks) {
+  if (!weeks) return "every week";
+  const names = weeks.map(w => w === 5 ? "last" : WEEK_NAMES[w]);
+  return names.join(" & ") + " week" + (weeks.length > 1 ? "s" : "") + " of the month";
+}
+// "Sun · 1st & 3rd weeks of the month" / "Mon · Wed · Fri"
+function schedLabel(st) {
+  if (!st.weeks) return daysLabel(st.days);
+  return `${daysLabel(st.days)} · ${weeksLabel(st.weeks)}`;
+}
+// does this step run on this date?
+function runsOn(st, date) {
+  if (st.days && !st.days.includes(date.getDay())) return false;
+  if (!st.weeks) return true;
+  const n = Math.ceil(date.getDate() / 7);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const isLast = date.getDate() + 7 > lastDay;
+  return st.weeks.includes(n) || (st.weeks.includes(5) && isLast);
+}
+function nextRun(st, from = today0()) {
+  for (let i = 0; i < 70; i++) { const d = addDays(from, i); if (runsOn(st, d)) return d; }
+  return null;
+}
+function dayPicker(sched, onChange) {
+  const days = sched.days || null, weeks = sched.weeks || null;
+  const wrap = el("div", "daypick");
+  const nr = nextRun(sched);
+  wrap.append(el("span", "lbl", `Schedule · ${schedLabel(sched)}${weeks && nr ? ` · next ${nr.toLocaleDateString(undefined, {weekday: "short", day: "numeric", month: "short"})}` : ""}`));
+  // which days of the week
+  const pre = el("div", "chips");
+  DAY_PRESETS.forEach(([label, d]) => {
+    const b = el("button", "chip preset", label); b.type = "button"; b.setAttribute("aria-pressed", String(sameDays(days, d)));
+    b.onclick = () => onChange({days: d ? d.slice() : null, weeks}); pre.append(b);
+  });
+  const row = el("div", "chips weekrow");
+  WEEK_ORDER.forEach(di => {
+    const b = el("button", "chip sm", DAY_NAMES[di].slice(0, 2)); b.type = "button"; b.setAttribute("aria-label", DAY_NAMES[di]);
+    b.setAttribute("aria-pressed", String(!days || days.includes(di)));
+    b.onclick = () => {
+      let ds = days ? days.slice() : [0, 1, 2, 3, 4, 5, 6];
+      ds = ds.includes(di) ? ds.filter(x => x !== di) : ds.concat(di).sort();
+      if (!ds.length) { toast("Keep at least one day, or remove the step"); return; }
+      onChange({days: ds.length === 7 ? null : ds, weeks});
+    };
+    row.append(b);
+  });
+  // how often in a month (for rare steps like exfoliation or masks)
+  const freq = el("div", "chips");
+  WEEK_PRESETS.forEach(([label, w]) => {
+    const b = el("button", "chip preset", label); b.type = "button"; b.setAttribute("aria-pressed", String(sameDays(weeks, w)));
+    b.onclick = () => {
+      // a monthly step on "every day" would run 7 days in a row, so suggest one day (Sunday) to start
+      const d = w && !days ? [0] : days;
+      if (w && !days) toast("Set to Sunday. Tap another day to change it.");
+      onChange({days: d, weeks: w ? w.slice() : null});
+    };
+    freq.append(b);
+  });
+  const wrow = el("div", "chips weekrow");
+  [1, 2, 3, 4, 5].forEach(w => {
+    const b = el("button", "chip wk", WEEK_NAMES[w]); b.type = "button"; b.setAttribute("aria-label", `${WEEK_NAMES[w]} week of the month`);
+    b.setAttribute("aria-pressed", String(!weeks || weeks.includes(w)));
+    b.onclick = () => {
+      let ws = weeks ? weeks.slice() : [1, 2, 3, 4, 5];
+      ws = ws.includes(w) ? ws.filter(x => x !== w) : ws.concat(w).sort();
+      if (!ws.length) { toast("Keep at least one week"); return; }
+      const all = ws.length === 5;
+      const d = !all && !days ? [0] : days;
+      if (!all && !days) toast("Set to Sunday. Tap another day to change it.");
+      onChange({days: d, weeks: all ? null : ws});
+    };
+    wrow.append(b);
+  });
+  wrap.append(el("span", "sublbl", "Days"), pre, row, el("span", "sublbl", "How often"), freq, wrow);
+  return wrap;
+}
+let newStep = {days: null, weeks: null};
+function renderNewStepDays() { const box = $("#r-days"); box.textContent = ""; box.append(dayPicker(newStep, s => { newStep = s; renderNewStepDays(); })); }
+
 function renderEditor() {
   const word = slot === "am" ? "morning" : "night";
   $("#rsheetTitle").textContent = `Edit ${word} steps`;
@@ -1129,19 +1311,7 @@ function renderEditor() {
     mkb("↑", "Move up", i === 0, () => { [steps[i-1], steps[i]] = [steps[i], steps[i-1]]; saveRoutine(); renderEditor(); });
     mkb("↓", "Move down", i === steps.length - 1, () => { [steps[i+1], steps[i]] = [steps[i], steps[i+1]]; saveRoutine(); renderEditor(); });
     mkb("✕", "Remove step", false, () => { steps.splice(i, 1); saveRoutine(); renderEditor(); }).style.color = "var(--bad)";
-    const days = el("div", "chips");
-    DAYS.forEach((d, di) => {
-      const b = el("button", "chip sm", d); b.type = "button"; b.setAttribute("aria-label", DAY_NAMES[di]);
-      b.setAttribute("aria-pressed", String(!st.days || st.days.includes(di)));
-      b.onclick = () => {
-        let ds = st.days ? st.days.slice() : [0,1,2,3,4,5,6];
-        ds = ds.includes(di) ? ds.filter(x => x !== di) : ds.concat(di).sort();
-        if (!ds.length) { toast("Keep at least one day, or remove the step"); return; }
-        st.days = ds.length === 7 ? null : ds; saveRoutine(); renderEditor();
-      };
-      days.append(b);
-    });
-    box.append(top, days);
+    box.append(top, dayPicker({days: st.days || null, weeks: st.weeks || null}, s => { st.days = s.days; st.weeks = s.weeks; saveRoutine(); renderEditor(); }));
     if (info.warn) { const w = el("span", "note", info.warn); w.style.color = "var(--bad)"; box.append(w); }
     list.append(box);
   });
@@ -1150,17 +1320,19 @@ function renderEditor() {
     .forEach(p => { const o = el("option", null, `${p.name} · ${p.type}${statusOf(p).key === "new" ? " (sealed)" : ""}`); o.value = p.id; pick.append(o); });
   const o = el("option", null, "Something not on my shelf…"); o.value = "__other"; pick.append(o);
   $("#r-otherRow").hidden = pick.value !== "__other";
+  renderNewStepDays();
 }
 $("#r-pick").onchange = () => { $("#r-otherRow").hidden = $("#r-pick").value !== "__other"; };
 $("#r-add").onclick = () => {
   const v = $("#r-pick").value;
   if (v === "__other") {
     const label = $("#r-other").value.trim(); if (!label) { $("#r-other").focus(); return; }
-    routine[slot].push({id: uid(), productId: null, label, type: "Other", days: null}); $("#r-other").value = "";
+    routine[slot].push({id: uid(), productId: null, label, type: "Other", days: newStep.days, weeks: newStep.weeks}); $("#r-other").value = "";
   } else {
     if (routine[slot].some(st => st.productId === v)) { toast("That product is already in this routine"); return; }
-    routine[slot].push({id: uid(), productId: v, days: null});
+    routine[slot].push({id: uid(), productId: v, days: newStep.days, weeks: newStep.weeks});
   }
+  newStep = {days: null, weeks: null};
   saveRoutine(); renderEditor();
 };
 $("#r-sort").onclick = () => { routine[slot].sort((a,b) => (ORDER[stepInfo(a).type]||9) - (ORDER[stepInfo(b).type]||9)); saveRoutine(); renderEditor(); toast("Sorted"); };
@@ -1484,7 +1656,7 @@ function blobURL(id) { return Photos.url(id); }
 const NAME_KEY = "skincare-shelf-name";
 function loadName() { try { firstName = (localStorage.getItem(NAME_KEY) || "").trim(); } catch { firstName = ""; } }
 // ---------- Profile page ----------
-const APP_VERSION = "1.5 · 16 Nov 2026";
+const APP_VERSION = "1.8 · 17 Nov 2026";
 const AVATAR_KEY = "skincare-shelf-avatar";
 function profilePhotoId() { try { const id = localStorage.getItem(AVATAR_KEY) || ""; return id && Photos.url(id) ? id : ""; } catch { return ""; } }
 let profileFilled = false;   // fill the form fields once per visit so typing isn't overwritten
